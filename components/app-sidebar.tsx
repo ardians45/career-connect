@@ -153,11 +153,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const userData = session?.user ? {
     name: session.user.name || "User",
     email: session.user.email,
-    avatar: session.user.image || "/codeguide-logo.png",
+    avatar: session.user.image || "/logo.png",
   } : {
     name: "Guest",
     email: "guest@example.com", 
-    avatar: "/codeguide-logo.png",
+    avatar: "/logo.png",
   }
 
   return (
@@ -170,8 +170,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link href="/">
-                <Image src="/codeguide-logo.png" alt="CodeGuide" width={32} height={32} className="rounded-lg" />
-                <span className="text-base font-semibold font-parkinsans">CodeGuide</span>
+                <Image src="public/logo.png" alt="CareerConnect" width={32} height={32} className="rounded-lg" />
+                <span className="text-base font-semibold font-parkinsans">CareerConnect</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
