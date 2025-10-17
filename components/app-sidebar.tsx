@@ -170,7 +170,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link href="/">
-                <Image src="public/logo.png" alt="CareerConnect" width={32} height={32} className="rounded-lg" />
+                <Image src="/logo.png" alt="CareerConnect" width={32} height={32} className="rounded-lg" />
                 <span className="text-base font-semibold font-parkinsans">CareerConnect</span>
               </Link>
             </SidebarMenuButton>

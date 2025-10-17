@@ -19,9 +19,12 @@ const parkinsans = Parkinsans({
 });
 
 export const metadata: Metadata = {
-  title: "Codeguide Starter Fullstack",
+  title: "CareerConnect - Temukan Minat & Bakat Karirmu",
   description:
-    "A modern Next.js starter with TypeScript, TailwindCSS, shadcn/ui, Better Auth, and Drizzle ORM",
+    "Platform asesmen karir berbasis RIASEC untuk membantu siswa SMK menentukan jurusan kuliah dan jalur karir yang sesuai dengan minat dan bakat mereka.",
+  icons: {
+    icon: "/logo-cc.png",
+  },
 };
 
 export default function RootLayout({

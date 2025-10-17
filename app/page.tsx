@@ -8,11 +8,11 @@ import {
   BarChart3, 
   Users, 
   BookOpen, 
-  Lightbulb, 
   Star,
   ArrowRight,
   CheckCircle
 } from 'lucide-react';
+import Image from 'next/image';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { AuthButtons } from '@/components/auth-buttons';
 import { useSession } from '@/lib/auth-client';
@@ -55,20 +55,34 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary p-2 rounded-lg">
-              <Lightbulb className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <h1 className="text-2xl font-bold">CareerConnect</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <AuthButtons />
-            <ThemeToggle />
-          </div>
-        </div>
+  <div className="container mx-auto px-4 py-4 md:py-6">
+  <div className="flex justify-between items-center">
+    {/* Logo container with text */}
+    <div className="flex items-center gap-2 md:gap-3">
+      <div className="relative w-[120px] sm:w-[40px] h-[40px] sm:h-[50px]">
+        <Image
+          src="/logo-cc.png"
+          alt="CareerConnect"
+          fill
+          className="object-contain"
+          priority
+        />
       </div>
+      <span className="hidden sm:block text-xl md:text-2xl font-bold">
+        <span className="text-purple-600 underline">Career</span>
+        <span className="text-blue-600 underline">Connect</span>
+      </span>
+    </div>
+
+    {/* Actions */}
+    <div className="flex items-center gap-2 sm:gap-3">
+      <AuthButtons />
+      <ThemeToggle />
+    </div>
+  </div>
+</div>
+
+
 
       {/* Hero Section */}
       <div className="text-center py-12 sm:py-20 px-4">
