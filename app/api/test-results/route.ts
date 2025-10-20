@@ -2,40 +2,74 @@ import { NextRequest } from 'next/server';
 import { db } from '@/db';
 import { testResult } from '@/db/schema/schema';
 import { eq, and, or, desc } from 'drizzle-orm';
-import { z } from 'zod';
 
-// Zod validation schemas
-const createTestResultSchema = z.object({
-  userId: z.string().optional(), // Allow guest users
-  guestSessionId: z.string().optional(),
-  realisticScore: z.number().min(0),
-  investigativeScore: z.number().min(0),
-  artisticScore: z.number().min(0),
-  socialScore: z.number().min(0),
-  enterprisingScore: z.number().min(0),
-  conventionalScore: z.number().min(0),
-  dominantType: z.string().min(1).max(1),
-  secondaryType: z.string().optional().max(1),
-  tertiaryType: z.string().optional().max(1),
-  testDuration: z.number().optional(),
-  totalQuestions: z.number().min(1),
-  rawAnswers: z.record(z.any()).optional(), // For guest users
-});
+// Fungsi helper untuk membuat UUID
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback implementation if crypto.randomUUID is not available
+  return 'id_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+}
 
-const updateTestResultSchema = z.object({
-  realisticScore: z.number().min(0).optional(),
-  investigativeScore: z.number().min(0).optional(),
-  artisticScore: z.number().min(0).optional(),
-  socialScore: z.number().min(0).optional(),
-  enterprisingScore: z.number().min(0).optional(),
-  conventionalScore: z.number().min(0).optional(),
-  dominantType: z.string().min(1).max(1).optional(),
-  secondaryType: z.string().max(1).optional(),
-  tertiaryType: z.string().max(1).optional(),
-  testDuration: z.number().optional(),
-  totalQuestions: z.number().min(1).optional(),
-  rawAnswers: z.record(z.any()).optional(),
-});
+// Fungsi validasi manual untuk test result
+function validateCreateTestResult(data: any) {
+  // Required fields
+  if (data.dominantType === undefined || typeof data.dominantType !== 'string' || data.dominantType.length !== 1) {
+    throw new Error('dominantType must be a string of length 1');
+  }
+  
+  if (typeof data.totalQuestions !== 'number' || data.totalQuestions < 1) {
+    throw new Error('totalQuestions must be a number greater than 0');
+  }
+  
+  // Score fields validation
+  const scoreFields = [
+    'realisticScore', 'investigativeScore', 'artisticScore', 
+    'socialScore', 'enterprisingScore', 'conventionalScore'
+  ];
+  
+  for (const field of scoreFields) {
+    if (typeof data[field] !== 'number' || data[field] < 0) {
+      throw new Error(`${field} must be a number greater than or equal to 0`);
+    }
+  }
+  
+  // Optional string fields with max length 1
+  const optionalCharFields = ['secondaryType', 'tertiaryType'];
+  for (const field of optionalCharFields) {
+    if (data[field] !== undefined && (typeof data[field] !== 'string' || data[field].length > 1)) {
+      throw new Error(`${field} must be a string of length 1 or undefined`);
+    }
+  }
+  
+  // Optional number fields
+  if (data.testDuration !== undefined && typeof data.testDuration !== 'number') {
+    throw new Error('testDuration must be a number if provided');
+  }
+  
+  // Optional rawAnswers field
+  if (data.rawAnswers !== undefined && typeof data.rawAnswers !== 'object') {
+    throw new Error('rawAnswers must be an object if provided');
+  }
+  
+  // Either userId or guestSessionId must be provided
+  if (!data.userId && !data.guestSessionId) {
+    throw new Error('Either userId or guestSessionId must be provided');
+  }
+  
+  // If userId is provided, it must be a string
+  if (data.userId && typeof data.userId !== 'string') {
+    throw new Error('userId must be a string if provided');
+  }
+  
+  // If guestSessionId is provided, it must be a string
+  if (data.guestSessionId && typeof data.guestSessionId !== 'string') {
+    throw new Error('guestSessionId must be a string if provided');
+  }
+  
+  return data;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -99,38 +133,65 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validatedData = createTestResultSchema.parse(body);
+    console.log('Received test result data:', body); // Logging untuk debugging
+    
+    // Validasi data menggunakan fungsi manual
+    const validatedData = validateCreateTestResult(body);
+    console.log('Validated test result data:', validatedData); // Logging untuk debugging
 
-    // Ensure either userId or guestSessionId is provided
-    if (!validatedData.userId && !validatedData.guestSessionId) {
-      return new Response(
-        JSON.stringify({ error: 'Either userId or guestSessionId must be provided' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+    console.log('Attempting to insert test result to database with data:', {
+      ...validatedData,
+      id: generateId(),
+      completedAt: new Date(),
+    });
+
+    // Create a clean object with only defined values to avoid database issues
+    const testResultData: any = {
+      id: generateId(),
+      userId: validatedData.userId || null,
+      guestSessionId: validatedData.guestSessionId || null,
+      realisticScore: validatedData.realisticScore,
+      investigativeScore: validatedData.investigativeScore,
+      artisticScore: validatedData.artisticScore,
+      socialScore: validatedData.socialScore,
+      enterprisingScore: validatedData.enterprisingScore,
+      conventionalScore: validatedData.conventionalScore,
+      dominantType: validatedData.dominantType,
+      completedAt: new Date(),
+      testDuration: validatedData.testDuration || null,
+      totalQuestions: validatedData.totalQuestions,
+      rawAnswers: validatedData.rawAnswers || null,
+    };
+
+    // Only add optional fields if they have values
+    if (validatedData.secondaryType !== undefined && validatedData.secondaryType !== null) {
+      testResultData.secondaryType = validatedData.secondaryType;
+    }
+    if (validatedData.tertiaryType !== undefined && validatedData.tertiaryType !== null) {
+      testResultData.tertiaryType = validatedData.tertiaryType;
     }
 
     // Create new test result
-    const [newResult] = await db.insert(testResult).values({
-      ...validatedData,
-      id: crypto.randomUUID(), // Generate UUID
-      completedAt: new Date(),
-    }).returning();
+    const insertedResult = await db.insert(testResult).values(testResultData).returning();
 
+    console.log('Successfully saved test result:', insertedResult[0]?.id); // Logging untuk debugging
     return new Response(
-      JSON.stringify(newResult),
+      JSON.stringify(insertedResult[0]),
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    if (error instanceof z.ZodError) {
+    console.error('Full error object:', error); // Logging tambahan
+    if (error.message && (error.message.includes('must be a string') || error.message.includes('must be a number'))) {
+      console.error('Validation error:', error.message);
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.message }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
     
     console.error('Error creating test result:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -148,7 +209,43 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const validatedData = updateTestResultSchema.parse(updateData);
+    // For PUT method, we'll do minimal validation since it's an update
+    // Only verify that required fields for update are correct types if they exist
+    if (updateData.dominantType !== undefined && 
+        (typeof updateData.dominantType !== 'string' || updateData.dominantType.length !== 1)) {
+      return new Response(
+        JSON.stringify({ error: 'Validation error', details: 'dominantType must be a string of length 1' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    const optionalCharFields = ['secondaryType', 'tertiaryType'];
+    for (const field of optionalCharFields) {
+      if (updateData[field] !== undefined && 
+          (typeof updateData[field] !== 'string' || updateData[field].length > 1)) {
+        return new Response(
+          JSON.stringify({ error: `Validation error`, details: `${field} must be a string of length 1` }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+    
+    // Validate number fields if they exist
+    const optionalNumberFields = [
+      'realisticScore', 'investigativeScore', 'artisticScore', 
+      'socialScore', 'enterprisingScore', 'conventionalScore', 'testDuration', 'totalQuestions'
+    ];
+    
+    for (const field of optionalNumberFields) {
+      if (updateData[field] !== undefined && typeof updateData[field] !== 'number') {
+        return new Response(
+          JSON.stringify({ error: `Validation error`, details: `${field} must be a number` }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+    
+    const validatedData = updateData;
 
     // Update test result
     const [updatedResult] = await db.update(testResult)

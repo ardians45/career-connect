@@ -20,82 +20,111 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSession } from '@/lib/auth-client';
-
-// Mock data for the dashboard
-const mockTestResults = [
-  {
-    id: '1',
-    date: '2024-10-01',
-    dominantType: 'R',
-    types: 'R-I-A',
-    score: 85,
-    title: 'RIASEC Career Assessment'
-  },
-  {
-    id: '2',
-    date: '2024-09-15',
-    dominantType: 'A',
-    types: 'A-S-E',
-    score: 72,
-    title: 'Creative Career Assessment'
-  },
-  {
-    id: '3',
-    date: '2024-08-22',
-    dominantType: 'S',
-    types: 'S-E-C',
-    score: 68,
-    title: 'Social Career Assessment'
-  }
-];
-
-const mockRecommendations = [
-  {
-    id: '1',
-    type: 'major',
-    title: 'Computer Science',
-    institution: 'University of Technology',
-    riasecMatch: '85%',
-    description: 'Study the fundamentals of programming, algorithms, and software engineering.'
-  },
-  {
-    id: '2',
-    type: 'career',
-    title: 'Software Developer',
-    industry: 'Technology',
-    riasecMatch: '90%',
-    description: 'Design, develop, and maintain software applications for various platforms.'
-  },
-  {
-    id: '3',
-    type: 'major',
-    title: 'Graphic Design',
-    institution: 'Art Institute',
-    riasecMatch: '78%',
-    description: 'Learn visual communication, typography, and digital design principles.'
-  }
-];
+import { EditProfileModal } from '@/components/edit-profile-modal';
 
 const DashboardPage = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [recentTest, setRecentTest] = useState<any>(null);
+  const [testResults, setTestResults] = useState<any[]>([]);
+  const [savedRecommendations, setSavedRecommendations] = useState<any[]>([]);
+  const [totalAssessments, setTotalAssessments] = useState<number>(0);
+  const [totalAssessmentsGrowth, setTotalAssessmentsGrowth] = useState<number>(0);
+  const [profileCompletion, setProfileCompletion] = useState<number>(0);
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // In a real app, fetch user data from the backend
-    // Mock user profile
-    setUserProfile({
-      name: 'John Doe',
-      school: 'SMK Negeri 1 Jakarta',
-      grade: 11,
-      lastTestDate: '2024-10-01',
-      dominantType: 'R'
-    });
-    
-    // Mock most recent test
-    setRecentTest(mockTestResults[0]);
-  }, []);
+    const fetchDashboardData = async () => {
+      if (session && session.user) {
+        try {
+          // Fetch actual dashboard data from API
+          const response = await fetch(`/api/dashboard/${session.user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Set user profile data from API response
+            if (data.userProfile) {
+              const profile = {
+                name: data.userProfile.name || data.userProfile.email?.split('@')[0],
+                school: data.userProfile.schoolName || null,
+                grade: data.userProfile.grade || null,
+                phone: data.userProfile.phone || null,
+                lastTestDate: data.userProfile.updatedAt ? new Date(data.userProfile.updatedAt).toLocaleDateString() : 'Never',
+                dominantType: 'R'
+              };
+              
+              setUserProfile(profile);
+              
+              // Calculate profile completion percentage
+              const profileFields = [
+                data.userProfile.name,
+                data.userProfile.schoolName,
+                data.userProfile.grade,
+                data.userProfile.phone
+              ];
+              
+              const filledFields = profileFields.filter(field => field != null).length;
+              const completionPercentage = Math.round((filledFields / profileFields.length) * 100);
+              setProfileCompletion(completionPercentage);
+            }
+            
+            setTestResults(data.testResults || []);
+            setSavedRecommendations(data.savedRecommendations || []);
+            setTotalAssessments(data.totalAssessments || 0);
+            setTotalAssessmentsGrowth(data.totalAssessmentsGrowth || 0);
+            
+            if (data.latestTestResult) {
+              // Format the test result to match expected structure
+              setRecentTest({
+                id: data.latestTestResult.id,
+                date: data.latestTestResult.completedAt,
+                dominantType: data.latestTestResult.dominantType,
+                types: [
+                  data.latestTestResult.dominantType,
+                  data.latestTestResult.secondaryType,
+                  data.latestTestResult.tertiaryType
+                ].filter(Boolean).join('-'),
+                // Calculate a representative score
+                score: Math.max(
+                  data.latestTestResult.realisticScore || 0,
+                  data.latestTestResult.investigativeScore || 0,
+                  data.latestTestResult.artisticScore || 0,
+                  data.latestTestResult.socialScore || 0,
+                  data.latestTestResult.enterprisingScore || 0,
+                  data.latestTestResult.conventionalScore || 0
+                ),
+                title: 'RIASEC Career Assessment'
+              });
+            }
+          } else {
+            console.error('Failed to fetch dashboard data:', response.status, response.statusText);
+            // Set default values in case of failure
+            setTestResults([]);
+            setSavedRecommendations([]);
+            setTotalAssessments(0);
+            setTotalAssessmentsGrowth(0);
+            setProfileCompletion(0);
+          }
+        } catch (error) {
+          console.error('Error fetching dashboard data:', error);
+          // Set default values in case of error
+          setTestResults([]);
+          setSavedRecommendations([]);
+          setTotalAssessments(0);
+          setTotalAssessmentsGrowth(0);
+          setProfileCompletion(0);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [session]);
 
   const handleStartTest = () => {
     router.push('/test');
@@ -109,12 +138,17 @@ const DashboardPage = () => {
     router.push(`/recommendations/${id}`);
   };
 
+  useEffect(() => {
+    if (!session && status === 'unauthenticated') {
+      router.push('/sign-in');
+    }
+  }, [session, status, router]);
+
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
 
   if (!session) {
-    router.push('/sign-in');
     return null;
   }
 
@@ -141,8 +175,8 @@ const DashboardPage = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockTestResults.length}</div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
+            <div className="text-2xl font-bold">{totalAssessments}</div>
+            <p className="text-xs text-muted-foreground">+{totalAssessmentsGrowth} from last month</p>
           </CardContent>
         </Card>
 
@@ -163,7 +197,7 @@ const DashboardPage = () => {
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockRecommendations.length}</div>
+            <div className="text-2xl font-bold">{savedRecommendations.length}</div>
             <p className="text-xs text-muted-foreground">Career & education paths</p>
           </CardContent>
         </Card>
@@ -174,7 +208,7 @@ const DashboardPage = () => {
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">85%</div>
+            <div className="text-2xl font-bold">{profileCompletion}%</div>
             <p className="text-xs text-muted-foreground">Complete your profile</p>
           </CardContent>
         </Card>
@@ -200,21 +234,34 @@ const DashboardPage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockTestResults.map((test) => (
+                {testResults.slice(0, 3).map((test) => (
                   <div 
                     key={test.id} 
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                     onClick={() => handleViewResult(test.id)}
                   >
                     <div>
-                      <h3 className="font-semibold">{test.title}</h3>
+                      <h3 className="font-semibold">RIASEC Career Assessment</h3>
                       <p className="text-sm text-muted-foreground">
                         <Clock className="inline h-3 w-3 mr-1" />
-                        {new Date(test.date).toLocaleDateString()} • Type: {test.types}
+                        {new Date(test.completedAt).toLocaleDateString()} • Type: {[
+                          test.dominantType,
+                          test.secondaryType,
+                          test.tertiaryType
+                        ].filter(Boolean).join('-')}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary">{test.score}%</Badge>
+                      <Badge variant="secondary">
+                        {Math.max(
+                          test.realisticScore,
+                          test.investigativeScore,
+                          test.artisticScore,
+                          test.socialScore,
+                          test.enterprisingScore,
+                          test.conventionalScore
+                        )}%
+                      </Badge>
                       <Button variant="outline" size="sm">
                         View
                       </Button>
@@ -249,15 +296,30 @@ const DashboardPage = () => {
                 <p className="font-medium">{userProfile?.grade || 'Not specified'}</p>
               </div>
               <div>
+                <p className="text-sm text-muted-foreground">Phone</p>
+                <p className="font-medium">{userProfile?.phone || 'Not specified'}</p>
+              </div>
+              <div>
                 <p className="text-sm text-muted-foreground">Last Assessment</p>
                 <p className="font-medium">{userProfile?.lastTestDate || 'Never'}</p>
               </div>
-              <Button variant="outline" className="w-full mt-4">
+              <Button 
+                variant="outline" 
+                className="w-full mt-4" 
+                onClick={() => setIsEditProfileModalOpen(true)}
+              >
                 Edit Profile
               </Button>
             </div>
           </CardContent>
         </Card>
+        
+        <EditProfileModal 
+          isOpen={isEditProfileModalOpen} 
+          onClose={() => setIsEditProfileModalOpen(false)} 
+          userProfile={userProfile}
+          userId={session?.user?.id}
+        />
       </div>
 
       {/* Saved Recommendations */}
@@ -273,7 +335,7 @@ const DashboardPage = () => {
             </Button>
           </div>
           <CardDescription>
-            Career paths and majors you've saved based on your test results
+            Career paths and majors you&#39;ve saved based on your test results
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -284,54 +346,57 @@ const DashboardPage = () => {
               <TabsTrigger value="careers">Careers</TabsTrigger>
             </TabsList>
             <TabsContent value="all" className="mt-4 space-y-4">
-              {mockRecommendations.map((rec) => (
-                <div 
-                  key={rec.id} 
-                  className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => handleViewRecommendation(rec.id)}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className={`p-2 rounded-lg ${rec.type === 'major' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                      {rec.type === 'major' ? <GraduationCap className="h-5 w-5" /> : <Briefcase className="h-5 w-5" />}
+              {savedRecommendations.map((rec) => {
+                const isMajor = rec.recommendationType === 'major';
+                return (
+                  <div 
+                    key={rec.id} 
+                    className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => handleViewRecommendation(rec.recommendationId)}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`p-2 rounded-lg ${isMajor ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                        {isMajor ? <GraduationCap className="h-5 w-5" /> : <Briefcase className="h-5 w-5" />}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{isMajor ? rec.majorName : rec.careerTitle}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {isMajor ? 'Major' : rec.careerIndustry}
+                        </p>
+                        <p className="text-sm mt-1">{isMajor ? rec.majorDescription : rec.careerDescription}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold">{rec.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {rec.type === 'major' ? rec.institution : rec.industry}
-                      </p>
-                      <p className="text-sm mt-1">{rec.description}</p>
+                    <div className="flex flex-col items-end">
+                      <Badge variant="outline">Saved {new Date(rec.savedAt).toLocaleDateString()}</Badge>
+                      <Button variant="outline" size="sm" className="mt-2">
+                        Details
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <Badge variant="outline">{rec.riasecMatch} match</Badge>
-                    <Button variant="outline" size="sm" className="mt-2">
-                      Details
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </TabsContent>
             <TabsContent value="majors" className="mt-4 space-y-4">
-              {mockRecommendations
-                .filter(rec => rec.type === 'major')
+              {savedRecommendations
+                .filter(rec => rec.recommendationType === 'major')
                 .map((rec) => (
                   <div 
                     key={rec.id} 
                     className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => handleViewRecommendation(rec.id)}
+                    onClick={() => handleViewRecommendation(rec.recommendationId)}
                   >
                     <div className="flex items-start gap-4">
                       <div className="p-2 rounded-lg bg-blue-100 text-blue-800">
                         <GraduationCap className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">{rec.title}</h3>
-                        <p className="text-sm text-muted-foreground">{rec.institution}</p>
-                        <p className="text-sm mt-1">{rec.description}</p>
+                        <h3 className="font-semibold">{rec.majorName}</h3>
+                        <p className="text-sm text-muted-foreground">Major</p>
+                        <p className="text-sm mt-1">{rec.majorDescription}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end">
-                      <Badge variant="outline">{rec.riasecMatch} match</Badge>
+                      <Badge variant="outline">Saved {new Date(rec.savedAt).toLocaleDateString()}</Badge>
                       <Button variant="outline" size="sm" className="mt-2">
                         Details
                       </Button>
@@ -340,26 +405,26 @@ const DashboardPage = () => {
                 ))}
             </TabsContent>
             <TabsContent value="careers" className="mt-4 space-y-4">
-              {mockRecommendations
-                .filter(rec => rec.type === 'career')
+              {savedRecommendations
+                .filter(rec => rec.recommendationType === 'career')
                 .map((rec) => (
                   <div 
                     key={rec.id} 
                     className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => handleViewRecommendation(rec.id)}
+                    onClick={() => handleViewRecommendation(rec.recommendationId)}
                   >
                     <div className="flex items-start gap-4">
                       <div className="p-2 rounded-lg bg-green-100 text-green-800">
                         <Briefcase className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">{rec.title}</h3>
-                        <p className="text-sm text-muted-foreground">{rec.industry}</p>
-                        <p className="text-sm mt-1">{rec.description}</p>
+                        <h3 className="font-semibold">{rec.careerTitle}</h3>
+                        <p className="text-sm text-muted-foreground">{rec.careerIndustry}</p>
+                        <p className="text-sm mt-1">{rec.careerDescription}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end">
-                      <Badge variant="outline">{rec.riasecMatch} match</Badge>
+                      <Badge variant="outline">Saved {new Date(rec.savedAt).toLocaleDateString()}</Badge>
                       <Button variant="outline" size="sm" className="mt-2">
                         Details
                       </Button>

@@ -16,4 +16,12 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+    user: {
+        // Include custom fields in the session
+        include: {
+            schoolName: true,
+            grade: true,
+            phone: true,
+        }
+    }
 });

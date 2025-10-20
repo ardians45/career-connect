@@ -22,10 +22,10 @@ export default function Home() {
   const { data: session, status } = useSession();
 
   const handleGetStarted = () => {
-    if (status === 'authenticated' && session) {
+    if (status === 'authenticated' && session?.user) {
       router.push('/dashboard');
     } else {
-      router.push('/test');
+      router.push('/sign-in');
     }
   };
 
@@ -99,7 +99,7 @@ export default function Home() {
               className="text-lg px-8 py-6 rounded-full"
               onClick={handleGetStarted}
             >
-              Ikuti Tes Sekarang
+              {status === 'authenticated' && session?.user ? 'Ke Dashboard' : 'Ikuti Tes Sekarang'}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button 
@@ -195,7 +195,7 @@ export default function Home() {
             className="text-lg px-8 py-6 rounded-full"
             onClick={handleGetStarted}
           >
-            Mulai Sekarang
+            {status === 'authenticated' && session?.user ? 'Ke Dashboard' : 'Mulai Sekarang'}
           </Button>
         </div>
       </div>

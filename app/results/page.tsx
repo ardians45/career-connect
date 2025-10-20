@@ -262,7 +262,15 @@ const ResultsPage = () => {
   }
 
   // Calculate total score for percentage calculations
-  const totalScore = Object.values(result.scores).reduce((sum, score) => sum + (score as number), 0);
+  // If result.scores exists (temp result), use it, otherwise construct from individual fields
+  const totalScore = result.scores 
+    ? Object.values(result.scores).reduce((sum, score) => sum + (score as number), 0)
+    : (result.realisticScore || 0) + 
+      (result.investigativeScore || 0) + 
+      (result.artisticScore || 0) + 
+      (result.socialScore || 0) + 
+      (result.enterprisingScore || 0) + 
+      (result.conventionalScore || 0);
 
   return (
     <div className="min-h-screen bg-background py-6">
@@ -350,18 +358,48 @@ const ResultsPage = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {Object.entries(result.scores).map(([category, score]) => (
-                <div key={category} className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="font-medium">{riasecDescriptions[category]?.name}</span>
-                    <span className="font-bold">{score}</span>
+              {result.scores ? (
+                // If result.scores exists (temp result)
+                Object.entries(result.scores).map(([category, score]) => (
+                  <div key={category} className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">{riasecDescriptions[category]?.name}</span>
+                      <span className="font-bold">{score}</span>
+                    </div>
+                    <Progress 
+                      value={(score as number) / Math.max(...Object.values(result.scores as Record<string, number>)) * 100} 
+                      className="h-3"
+                    />
                   </div>
-                  <Progress 
-                    value={(score as number) / Math.max(...Object.values(result.scores as Record<string, number>)) * 100} 
-                    className="h-3"
-                  />
-                </div>
-              ))}
+                ))
+              ) : (
+                // If using individual fields from database
+                ['R', 'I', 'A', 'S', 'E', 'C'].map(category => {
+                  const score = result[`${category.toLowerCase()}Score`];
+                  const maxScore = Math.max(
+                    result.realisticScore || 0,
+                    result.investigativeScore || 0,
+                    result.artisticScore || 0,
+                    result.socialScore || 0,
+                    result.enterprisingScore || 0,
+                    result.conventionalScore || 0
+                  );
+                  const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+                  
+                  return (
+                    <div key={category} className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">{riasecDescriptions[category]?.name}</span>
+                        <span className="font-bold">{score}</span>
+                      </div>
+                      <Progress 
+                        value={percentage} 
+                        className="h-3"
+                      />
+                    </div>
+                  );
+                })
+              )}
             </div>
           </CardContent>
         </Card>

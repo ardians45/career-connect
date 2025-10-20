@@ -173,32 +173,65 @@ const TestPage = () => {
     // For logged-in users, save the result immediately to the database
     if (session) {
       try {
+        console.log('Sending test result data:', {
+          userId: session.user.id,
+          realisticScore: resultData.scores.R,
+          investigativeScore: resultData.scores.I,
+          artisticScore: resultData.scores.A,
+          socialScore: resultData.scores.S,
+          enterprisingScore: resultData.scores.E,
+          conventionalScore: resultData.scores.C,
+          dominantType: resultData.dominantType,
+          secondaryType: resultData.secondaryType,
+          tertiaryType: resultData.tertiaryType,
+          testDuration: resultData.testDuration,
+          totalQuestions: resultData.totalQuestions,
+          rawAnswers: resultData.rawAnswers,
+        });
+
+        // Prepare data with proper null/undefined handling for optional fields
+        const testDataToSend = {
+          userId: session.user.id,
+          realisticScore: resultData.scores.R,
+          investigativeScore: resultData.scores.I,
+          artisticScore: resultData.scores.A,
+          socialScore: resultData.scores.S,
+          enterprisingScore: resultData.scores.E,
+          conventionalScore: resultData.scores.C,
+          dominantType: resultData.dominantType || 'X', // Provide default value
+          testDuration: resultData.testDuration,
+          totalQuestions: resultData.totalQuestions,
+          rawAnswers: resultData.rawAnswers,
+        };
+
+        // Only add optional fields if they have valid values
+        if (resultData.secondaryType) {
+          testDataToSend.secondaryType = resultData.secondaryType;
+        }
+        if (resultData.tertiaryType) {
+          testDataToSend.tertiaryType = resultData.tertiaryType;
+        }
+
         const response = await fetch('/api/test-results', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            userId: session.user.id,
-            realisticScore: resultData.scores.R,
-            investigativeScore: resultData.scores.I,
-            artisticScore: resultData.scores.A,
-            socialScore: resultData.scores.S,
-            enterprisingScore: resultData.scores.E,
-            conventionalScore: resultData.scores.C,
-            dominantType: resultData.dominantType,
-            secondaryType: resultData.secondaryType,
-            tertiaryType: resultData.tertiaryType,
-            testDuration: resultData.testDuration,
-            totalQuestions: resultData.totalQuestions,
-            rawAnswers: resultData.rawAnswers,
-          }),
+          body: JSON.stringify(testDataToSend),
         });
+
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          console.error('Response error:', await response.text());
+        }
 
         if (response.ok) {
           const savedResult = await response.json();
+          console.log('Saved result:', savedResult);
           router.push(`/results/${savedResult.id}`);
           return; // Exit early after redirecting
+        } else {
+          console.error('Failed to save result, falling back to temporary storage');
         }
       } catch (error) {
         console.error('Error saving result:', error);
