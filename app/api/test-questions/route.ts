@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/db';
 import { testQuestion } from '@/db/schema/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Zod validation schemas
@@ -41,27 +41,33 @@ export async function GET(request: NextRequest) {
       );
     } else if (category) {
       // Get test questions by category
-      let query = db.select().from(testQuestion);
-      
       if (isActive !== null && isActive !== undefined) {
         // If isActive is provided, filter by both category and isActive
         const isActiveBool = isActive === 'true';
-        query = query.where(and(
-          eq(testQuestion.category, category),
-          eq(testQuestion.isActive, isActiveBool)
-        ));
+        const results = await db.select()
+          .from(testQuestion)
+          .where(and(
+            eq(testQuestion.category, category),
+            eq(testQuestion.isActive, isActiveBool)
+          ))
+          .orderBy(testQuestion.order);
+        
+        return new Response(
+          JSON.stringify(results),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
       } else {
         // If isActive is not provided, just filter by category
-        query = query.where(eq(testQuestion.category, category));
+        const results = await db.select()
+          .from(testQuestion)
+          .where(eq(testQuestion.category, category))
+          .orderBy(testQuestion.order);
+          
+        return new Response(
+          JSON.stringify(results),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
       }
-      
-      query = query.orderBy(testQuestion.order);
-      
-      const results = await query;
-      return new Response(
-        JSON.stringify(results),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      );
     } else if (isActive !== null && isActive !== undefined) {
       // Get test questions by active status only
       const isActiveBool = isActive === 'true';
@@ -112,7 +118,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.issues }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -159,7 +165,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.issues }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }

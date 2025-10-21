@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/db';
 import { career } from '@/db/schema/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, ilike } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Zod validation schemas
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       // Get careers by RIASEC type
       const results = await db.select()
         .from(career)
-        .where(career.riasecTypes.like(`%${riasecType}%`))
+        .where(ilike(career.riasecTypes, `%${riasecType}%`))
         .orderBy(desc(career.popularityScore));
         
       return new Response(
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.issues }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -168,7 +168,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.issues }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }

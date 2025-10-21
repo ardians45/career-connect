@@ -7,14 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { 
   GraduationCap, 
-  MapPin, 
   DollarSign, 
   Clock, 
   TrendingUp, 
   Users,
   Star,
   Heart,
-  ArrowLeft
+  ArrowLeft,
+  CheckCircle
 } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
 
@@ -53,11 +53,30 @@ const mockMajors = [
   }
 ];
 
+interface Major {
+  id: string;
+  name: string;
+  description: string;
+  riasecTypes: string;
+  degreeLevel: string;
+  studyDuration: number;
+  averageTuition: number;
+  jobOutlook: string;
+  averageSalary: number;
+  popularityScore: number;
+  institution: string;
+  location: string;
+  admissionQuota: number;
+  requiredSubjects: string[];
+  curriculum: string[];
+  careerProspects: string[];
+}
+
 const MajorDetailPage = () => {
   const router = useRouter();
   const params = useParams();
   const { data: session } = useSession();
-  const [major, setMajor] = useState<any>(null);
+  const [major, setMajor] = useState<Major | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -74,7 +93,7 @@ const MajorDetailPage = () => {
         router.push('/majors');
       }, 1000);
     }
-  }, [params.id]);
+  }, [params.id, router]);
 
   const toggleSave = () => {
     if (!session) {

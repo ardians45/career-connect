@@ -12,12 +12,10 @@ import {
   Briefcase, 
   Search, 
   Star, 
-  Heart, 
-  MapPin,
+  Heart,
   DollarSign,
   TrendingUp,
-  Clock,
-  User
+  Clock
 } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
 
@@ -112,13 +110,43 @@ const mockCareers = [
   }
 ];
 
+interface Major {
+  id: string;
+  name: string;
+  description: string;
+  riasecTypes: string;
+  degreeLevel: string;
+  studyDuration: number;
+  averageTuition: number;
+  jobOutlook: string;
+  averageSalary: number;
+  popularityScore: number;
+  institution: string;
+  imageUrl?: string;
+}
+
+interface Career {
+  id: string;
+  title: string;
+  description: string;
+  riasecTypes: string;
+  industry: string;
+  experienceLevel: string;
+  requiredSkills: string[];
+  educationRequirement: string;
+  salaryRange: { min: number; max: number };
+  jobGrowthRate: number;
+  popularityScore: number;
+  imageUrl?: string;
+}
+
 const RecommendationsPage = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [majors, setMajors] = useState<any[]>([]);
-  const [careers, setCareers] = useState<any[]>([]);
+  const [majors, setMajors] = useState<Major[]>([]);
+  const [careers, setCareers] = useState<Career[]>([]);
   const [savedRecommendations, setSavedRecommendations] = useState<string[]>([]);
 
   useEffect(() => {

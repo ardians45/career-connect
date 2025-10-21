@@ -19,12 +19,12 @@ import { useSession } from '@/lib/auth-client';
 
 export default function Home() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
 
   const handleGetStarted = () => {
-    if (status === 'authenticated' && session?.user) {
+    if (session?.user && !isPending) {
       router.push('/dashboard');
-    } else {
+    } else if (!isPending) {
       router.push('/sign-in');
     }
   };
@@ -99,7 +99,7 @@ export default function Home() {
               className="text-lg px-8 py-6 rounded-full"
               onClick={handleGetStarted}
             >
-              {status === 'authenticated' && session?.user ? 'Ke Dashboard' : 'Ikuti Tes Sekarang'}
+              {!isPending && session?.user ? 'Ke Dashboard' : 'Ikuti Tes Sekarang'}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button 
@@ -195,7 +195,7 @@ export default function Home() {
             className="text-lg px-8 py-6 rounded-full"
             onClick={handleGetStarted}
           >
-            {status === 'authenticated' && session?.user ? 'Ke Dashboard' : 'Mulai Sekarang'}
+            {!isPending && session?.user ? 'Ke Dashboard' : 'Mulai Sekarang'}
           </Button>
         </div>
       </div>

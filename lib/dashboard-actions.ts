@@ -1,6 +1,6 @@
 'use server';
 
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { testResult, savedRecommendation, major, career } from '@/db/schema/schema';
 import { user } from '@/db/schema/auth';
@@ -73,7 +73,7 @@ export async function getUserTotalAssessments(userId: string) {
   try {
     console.log('Fetching total assessments for user:', userId);
     const result = await db
-      .select({ count: db.$count() })
+      .select({ count: sql<number>`count(*)` })
       .from(testResult)
       .where(eq(testResult.userId, userId));
     

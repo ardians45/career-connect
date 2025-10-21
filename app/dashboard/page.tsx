@@ -9,10 +9,7 @@ import {
   BarChart3, 
   GraduationCap, 
   Briefcase, 
-  Calendar, 
-  TrendingUp, 
-  User, 
-  BookOpen,
+  User,
   FileText,
   Plus,
   Clock,
@@ -22,13 +19,57 @@ import { useRouter } from 'next/navigation';
 import { useSession } from '@/lib/auth-client';
 import { EditProfileModal } from '@/components/edit-profile-modal';
 
+interface UserProfile {
+  name: string;
+  school: string | null;
+  grade: number | null;
+  phone: string | null;
+  lastTestDate: string;
+  dominantType: string;
+}
+
+interface TestResult {
+  id: string;
+  completedAt: string;
+  dominantType: string;
+  secondaryType: string;
+  tertiaryType: string;
+  realisticScore: number;
+  investigativeScore: number;
+  artisticScore: number;
+  socialScore: number;
+  enterprisingScore: number;
+  conventionalScore: number;
+}
+
+interface SavedRecommendation {
+  id: string;
+  recommendationType: 'major' | 'career';
+  recommendationId: string;
+  majorName?: string;
+  majorDescription?: string;
+  careerTitle?: string;
+  careerDescription?: string;
+  careerIndustry?: string;
+  savedAt: string;
+}
+
+interface RecentTest {
+  id: string;
+  date: string;
+  dominantType: string;
+  types: string;
+  score: number;
+  title: string;
+}
+
 const DashboardPage = () => {
   const router = useRouter();
-  const { data: session, status } = useSession();
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [recentTest, setRecentTest] = useState<any>(null);
-  const [testResults, setTestResults] = useState<any[]>([]);
-  const [savedRecommendations, setSavedRecommendations] = useState<any[]>([]);
+  const { data: session, isPending } = useSession();
+  const [userProfile, setUserProfile] = useState<UserProfile | undefined>(undefined);
+  const [recentTest, setRecentTest] = useState<RecentTest | null>(null);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [savedRecommendations, setSavedRecommendations] = useState<SavedRecommendation[]>([]);
   const [totalAssessments, setTotalAssessments] = useState<number>(0);
   const [totalAssessmentsGrowth, setTotalAssessmentsGrowth] = useState<number>(0);
   const [profileCompletion, setProfileCompletion] = useState<number>(0);
@@ -139,12 +180,12 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    if (!session && status === 'unauthenticated') {
+    if (!session && !isPending) {
       router.push('/sign-in');
     }
-  }, [session, status, router]);
+  }, [session, isPending, router]);
 
-  if (status === 'loading') {
+  if (isPending) {
     return <div>Loading...</div>;
   }
 

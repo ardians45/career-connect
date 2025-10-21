@@ -16,15 +16,33 @@ import {
   BookOpen,
   MessageCircle,
   Plus,
-  Search,
-  MapPin,
-  Phone,
-  Mail
+  Search
 } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
 
+// Define types
+interface CounselingSession {
+  id: string;
+  teacherName: string;
+  teacherSubject: string;
+  studentName: string;
+  sessionDate: string;
+  status: 'scheduled' | 'completed' | 'in-progress';
+  notes: string;
+  recommendations: string;
+  testResultId: string;
+  followUpDate: string | null;
+}
+
+interface NewSessionForm {
+  teacherId: string;
+  studentId: string;
+  sessionDate: string;
+  notes: string;
+}
+
 // Mock data for counseling sessions
-const mockSessions = [
+const mockSessions: CounselingSession[] = [
   {
     id: '1',
     teacherName: 'Budi Santoso, M.Pd',
@@ -65,11 +83,11 @@ const mockSessions = [
 
 const CounselingPage = () => {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
   const [activeTab, setActiveTab] = useState('upcoming');
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<CounselingSession[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [newSession, setNewSession] = useState({
+  const [newSession, setNewSession] = useState<NewSessionForm>({
     teacherId: '',
     studentId: '',
     sessionDate: '',
@@ -118,7 +136,7 @@ const CounselingPage = () => {
     });
   };
 
-  if (status === 'loading') {
+  if (isPending) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -151,52 +169,50 @@ const CounselingPage = () => {
         </div>
 
         {/* Schedule New Session Card - Only visible for teachers */}
-        {session?.user?.role === 'teacher' && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Jadwalkan Sesi Baru
-              </CardTitle>
-              <CardDescription>
-                Atur pertemuan konseling karir dengan siswa
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Siswa</label>
-                  <Input 
-                    placeholder="Pilih siswa..." 
-                    value={newSession.studentId}
-                    onChange={(e) => setNewSession({...newSession, studentId: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Tanggal & Waktu</label>
-                  <Input 
-                    type="datetime-local"
-                    value={newSession.sessionDate}
-                    onChange={(e) => setNewSession({...newSession, sessionDate: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div className="mt-4">
-                <label className="text-sm font-medium mb-2 block">Catatan Awal</label>
-                <Textarea 
-                  placeholder="Catatan tentang tujuan sesi konseling..."
-                  value={newSession.notes}
-                  onChange={(e) => setNewSession({...newSession, notes: e.target.value})}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Jadwalkan Sesi Baru
+            </CardTitle>
+            <CardDescription>
+              Atur pertemuan konseling karir dengan siswa
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Siswa</label>
+                <Input 
+                  placeholder="Pilih siswa..." 
+                  value={newSession.studentId}
+                  onChange={(e) => setNewSession({...newSession, studentId: e.target.value})}
                 />
               </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleScheduleSession}>
-                Jadwalkan Sesi
-              </Button>
-            </CardFooter>
-          </Card>
-        )}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Tanggal & Waktu</label>
+                <Input 
+                  type="datetime-local"
+                  value={newSession.sessionDate}
+                  onChange={(e) => setNewSession({...newSession, sessionDate: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="text-sm font-medium mb-2 block">Catatan Awal</label>
+              <Textarea 
+                placeholder="Catatan tentang tujuan sesi konseling..."
+                value={newSession.notes}
+                onChange={(e) => setNewSession({...newSession, notes: e.target.value})}
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleScheduleSession}>
+              Jadwalkan Sesi
+            </Button>
+          </CardFooter>
+        </Card>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
@@ -218,11 +234,9 @@ const CounselingPage = () => {
                   <p className="text-muted-foreground mb-4">
                     Belum ada sesi konseling yang dijadwalkan
                   </p>
-                  {session?.user?.role === 'teacher' && (
-                    <Button onClick={() => setActiveTab('all')}>
-                      Atur Sesi Baru
-                    </Button>
-                  )}
+                  <Button onClick={() => setActiveTab('all')}>
+                    Atur Sesi Baru
+                  </Button>
                 </CardContent>
               </Card>
             ) : (

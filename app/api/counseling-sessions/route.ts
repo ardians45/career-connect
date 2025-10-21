@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/db';
 import { counselingSession } from '@/db/schema/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Zod validation schemas
@@ -103,11 +103,11 @@ export async function POST(request: NextRequest) {
 
     // Check if a session already exists with the same teacher and student at the same time
     const existingSession = await db.select().from(counselingSession)
-      .where(
+      .where(and(
         eq(counselingSession.teacherId, validatedData.teacherId),
         eq(counselingSession.studentId, validatedData.studentId),
         eq(counselingSession.sessionDate, new Date(validatedData.sessionDate))
-      ).limit(1);
+      )).limit(1);
     
     if (existingSession.length > 0) {
       return new Response(
@@ -120,6 +120,8 @@ export async function POST(request: NextRequest) {
     const [newSession] = await db.insert(counselingSession).values({
       ...validatedData,
       id: crypto.randomUUID(), // Generate UUID
+      sessionDate: new Date(validatedData.sessionDate), // Convert string to Date
+      followUpDate: validatedData.followUpDate ? new Date(validatedData.followUpDate) : null, // Convert string to Date or set null
       createdAt: new Date(),
       updatedAt: new Date(),
       status: validatedData.status || 'scheduled',
@@ -132,7 +134,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.issues }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -159,9 +161,19 @@ export async function PUT(request: NextRequest) {
 
     const validatedData = updateCounselingSessionSchema.parse(updateData);
 
+    // Prepare update data with converted dates
+    const preparedUpdateData: Partial<typeof counselingSession.$inferInsert> = {
+      ...validatedData,
+      sessionDate: validatedData.sessionDate ? new Date(validatedData.sessionDate) : undefined,
+      followUpDate: validatedData.followUpDate ? 
+        (typeof validatedData.followUpDate === 'string' ? new Date(validatedData.followUpDate) : validatedData.followUpDate) 
+        : null,
+      updatedAt: new Date()
+    };
+    
     // Update counseling session
     const [updatedSession] = await db.update(counselingSession)
-      .set({ ...validatedData, updatedAt: new Date() })
+      .set(preparedUpdateData)
       .where(eq(counselingSession.id, id))
       .returning();
 
@@ -179,7 +191,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.issues }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }

@@ -46,26 +46,31 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
+interface UserProfile {
+  name: string;
+  school: string | null;
+  grade: number | null;
+  phone: string | null;
+}
+
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userProfile?: any;
+  userProfile?: UserProfile;
   userId?: string;
 }
 
 export function EditProfileModal({ isOpen, onClose, userProfile, userId }: EditProfileModalProps) {
-  const { data: session, update } = useSession();
+  const { data: session } = useSession();
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       name: userProfile?.name || session?.user?.name || '',
-      schoolName: userProfile?.school || session?.user?.schoolName || '',
-      grade: (userProfile?.grade !== null && userProfile?.grade !== undefined) ? userProfile?.grade : 
-             (session?.user?.grade !== null && session?.user?.grade !== undefined) ? session?.user?.grade : null,
-      phone: userProfile?.phone || session?.user?.phone || '',
+      schoolName: userProfile?.school || '', // Removed session?.user?.school because it doesn't exist
+      grade: (userProfile?.grade !== null && userProfile?.grade !== undefined) ? userProfile?.grade : null, // Removed session?.user?.grade because it doesn't exist
+      phone: userProfile?.phone || '', // Removed session?.user?.phone because it doesn't exist
     },
   });
 
@@ -107,7 +112,7 @@ export function EditProfileModal({ isOpen, onClose, userProfile, userId }: EditP
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
+            Make changes to your profile here. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

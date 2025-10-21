@@ -7,10 +7,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { 
   Briefcase, 
-  MapPin, 
   DollarSign, 
   TrendingUp, 
-  Users,
   Star,
   Heart,
   ArrowLeft,
@@ -18,8 +16,26 @@ import {
 } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
 
+// Define types
+interface Career {
+  id: string;
+  title: string;
+  description: string;
+  riasecTypes: string;
+  industry: string;
+  experienceLevel: string;
+  requiredSkills: string[];
+  educationRequirement: string;
+  salaryRange: { min: number; max: number };
+  jobGrowthRate: number;
+  popularityScore: number;
+  workEnvironment: string;
+  typicalTasks: string[];
+  careerPath: string[];
+}
+
 // Mock data for careers
-const mockCareers = [
+const mockCareers: Career[] = [
   {
     id: '1',
     title: 'Software Engineer',
@@ -51,7 +67,7 @@ const CareerDetailPage = () => {
   const router = useRouter();
   const params = useParams();
   const { data: session } = useSession();
-  const [career, setCareer] = useState<any>(null);
+  const [career, setCareer] = useState<Career | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -68,7 +84,7 @@ const CareerDetailPage = () => {
         router.push('/careers');
       }, 1000);
     }
-  }, [params.id]);
+  }, [params.id, router]);
 
   const toggleSave = () => {
     if (!session) {

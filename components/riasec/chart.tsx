@@ -25,7 +25,15 @@ const RIASECChart = ({ data }: RiasecChartProps) => {
   };
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
+  interface CustomTooltipProps {
+    active?: boolean;
+    payload?: Array<{
+      value: number;
+      payload: RiasecData;
+    }>;
+  }
+
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-background border p-3 rounded shadow-md">

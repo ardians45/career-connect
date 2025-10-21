@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/db';
 import { savedRecommendation } from '@/db/schema/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Zod validation schemas
@@ -83,11 +83,11 @@ export async function POST(request: NextRequest) {
 
     // Check if this recommendation is already saved by this user
     const existingRecommendation = await db.select().from(savedRecommendation)
-      .where(
+      .where(and(
         eq(savedRecommendation.userId, validatedData.userId),
         eq(savedRecommendation.recommendationType, validatedData.recommendationType),
         eq(savedRecommendation.recommendationId, validatedData.recommendationId)
-      ).limit(1);
+      )).limit(1);
     
     if (existingRecommendation.length > 0) {
       return new Response(
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.issues }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -157,7 +157,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.issues }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }

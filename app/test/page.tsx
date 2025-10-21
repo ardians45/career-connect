@@ -199,18 +199,12 @@ const TestPage = () => {
           enterprisingScore: resultData.scores.E,
           conventionalScore: resultData.scores.C,
           dominantType: resultData.dominantType || 'X', // Provide default value
+          secondaryType: resultData.secondaryType || undefined,
+          tertiaryType: resultData.tertiaryType || undefined,
           testDuration: resultData.testDuration,
           totalQuestions: resultData.totalQuestions,
           rawAnswers: resultData.rawAnswers,
         };
-
-        // Only add optional fields if they have valid values
-        if (resultData.secondaryType) {
-          testDataToSend.secondaryType = resultData.secondaryType;
-        }
-        if (resultData.tertiaryType) {
-          testDataToSend.tertiaryType = resultData.tertiaryType;
-        }
 
         const response = await fetch('/api/test-results', {
           method: 'POST',

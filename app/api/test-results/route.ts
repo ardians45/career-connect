@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/db';
 import { testResult } from '@/db/schema/schema';
-import { eq, and, or, desc } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
+import { z } from 'zod';
 
 // Fungsi helper untuk membuat UUID
 function generateId(): string {
@@ -12,8 +13,25 @@ function generateId(): string {
   return 'id_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 }
 
+interface CreateTestResultData {
+  dominantType: string;
+  secondaryType?: string;
+  tertiaryType?: string;
+  realisticScore: number;
+  investigativeScore: number;
+  artisticScore: number;
+  socialScore: number;
+  enterprisingScore: number;
+  conventionalScore: number;
+  userId?: string;
+  guestSessionId?: string;
+  testDuration?: number;
+  totalQuestions: number;
+  rawAnswers?: Record<string, unknown> | null;
+}
+
 // Fungsi validasi manual untuk test result
-function validateCreateTestResult(data: any) {
+function validateCreateTestResult(data: CreateTestResultData) {
   // Required fields
   if (data.dominantType === undefined || typeof data.dominantType !== 'string' || data.dominantType.length !== 1) {
     throw new Error('dominantType must be a string of length 1');
@@ -30,7 +48,7 @@ function validateCreateTestResult(data: any) {
   ];
   
   for (const field of scoreFields) {
-    if (typeof data[field] !== 'number' || data[field] < 0) {
+    if (typeof data[field as keyof CreateTestResultData] !== 'number' || (data[field as keyof CreateTestResultData] as number) < 0) {
       throw new Error(`${field} must be a number greater than or equal to 0`);
     }
   }
@@ -38,7 +56,7 @@ function validateCreateTestResult(data: any) {
   // Optional string fields with max length 1
   const optionalCharFields = ['secondaryType', 'tertiaryType'];
   for (const field of optionalCharFields) {
-    if (data[field] !== undefined && (typeof data[field] !== 'string' || data[field].length > 1)) {
+    if (data[field as keyof CreateTestResultData] !== undefined && (typeof data[field as keyof CreateTestResultData] !== 'string' || (data[field as keyof CreateTestResultData] as string).length > 1)) {
       throw new Error(`${field} must be a string of length 1 or undefined`);
     }
   }
@@ -146,7 +164,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create a clean object with only defined values to avoid database issues
-    const testResultData: any = {
+    const testResultData = {
       id: generateId(),
       userId: validatedData.userId || null,
       guestSessionId: validatedData.guestSessionId || null,
@@ -157,22 +175,16 @@ export async function POST(request: NextRequest) {
       enterprisingScore: validatedData.enterprisingScore,
       conventionalScore: validatedData.conventionalScore,
       dominantType: validatedData.dominantType,
+      secondaryType: validatedData.secondaryType || null, // Include the field, setting to null if undefined
+      tertiaryType: validatedData.tertiaryType || null,   // Include the field, setting to null if undefined
       completedAt: new Date(),
       testDuration: validatedData.testDuration || null,
       totalQuestions: validatedData.totalQuestions,
       rawAnswers: validatedData.rawAnswers || null,
     };
 
-    // Only add optional fields if they have values
-    if (validatedData.secondaryType !== undefined && validatedData.secondaryType !== null) {
-      testResultData.secondaryType = validatedData.secondaryType;
-    }
-    if (validatedData.tertiaryType !== undefined && validatedData.tertiaryType !== null) {
-      testResultData.tertiaryType = validatedData.tertiaryType;
-    }
-
     // Create new test result
-    const insertedResult = await db.insert(testResult).values(testResultData).returning();
+    const insertedResult = await db.insert(testResult).values(testResultData as typeof testResult.$inferInsert).returning();
 
     console.log('Successfully saved test result:', insertedResult[0]?.id); // Logging untuk debugging
     return new Response(
@@ -181,7 +193,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Full error object:', error); // Logging tambahan
-    if (error.message && (error.message.includes('must be a string') || error.message.includes('must be a number'))) {
+    if (error instanceof Error && error.message && (error.message.includes('must be a string') || error.message.includes('must be a number'))) {
       console.error('Validation error:', error.message);
       return new Response(
         JSON.stringify({ error: 'Validation error', details: error.message }),
@@ -267,7 +279,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Validation error', details: error.errors }),
+        JSON.stringify({ error: 'Validation error', details: error.issues }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }

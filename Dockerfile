@@ -1,5 +1,5 @@
-# Use the official Node.js 18 image
-FROM node:18-alpine AS base
+# Use the official Node.js 20 image for better compatibility
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -7,9 +7,9 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
+# Install production dependencies only
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci --only=production --omit=dev
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -17,7 +17,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma/Drizzle client
+# Generate Drizzle schema
 RUN npm run db:generate
 
 # Build the application
@@ -45,9 +45,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-EXPOSE 3000
+# Expose port - Railway will provide the PORT environment variable
+EXPOSE $PORT 3000
 
-ENV PORT=3000
+# Set the hostname to allow external connections
 ENV HOSTNAME="0.0.0.0"
 
 # server.js is created by next build from the standalone output

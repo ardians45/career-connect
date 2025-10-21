@@ -2,9 +2,9 @@ import { NextRequest } from 'next/server';
 import { getUserTestResults, getLatestTestResult, getUserSavedRecommendations } from '@/lib/dashboard-actions';
 import { getUserProfile } from '@/lib/user-actions';
 
-export async function GET(request: NextRequest, { params }: { params: { userId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
   try {
-    const userId = params.userId;
+    const { userId } = await params;
     
     if (!userId) {
       return new Response(JSON.stringify({ error: 'User ID is required' }), {
@@ -26,11 +26,16 @@ export async function GET(request: NextRequest, { params }: { params: { userId: 
     const userProfile = await getUserProfile(userId);
     console.log('User profile fetched:', userProfile?.name);
 
+interface TestResult {
+  id: string;
+  completedAt: Date; // Database returns Date objects
+}
+
     // Calculate assessment growth (simplified)
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
     
-    const recentAssessments = testResults.filter((result: any) => {
+    const recentAssessments = testResults.filter((result: TestResult) => {
       try {
         const resultDate = new Date(result.completedAt);
         return resultDate >= oneMonthAgo && !isNaN(resultDate.getTime());

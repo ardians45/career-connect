@@ -12,8 +12,6 @@ import {
   Briefcase, 
   Star, 
   Share2, 
-  Download,
-  Clock,
   RotateCcw,
   ArrowRight
 } from 'lucide-react';
@@ -53,11 +51,37 @@ const riasecDescriptions: Record<string, { name: string, description: string, ca
   }
 };
 
+interface TestResult {
+  id?: string;
+  userId?: string;
+  dominantType: string;
+  secondaryType?: string;
+  tertiaryType?: string;
+  realisticScore?: number;
+  investigativeScore?: number;
+  artisticScore?: number;
+  socialScore?: number;
+  enterprisingScore?: number;
+  conventionalScore?: number;
+  scores?: {
+    R: number;
+    I: number;
+    A: number;
+    S: number;
+    E: number;
+    C: number;
+  };
+  testDuration?: number;
+  totalQuestions?: number;
+  rawAnswers?: Record<string, unknown> | null;
+  completedAt: string;
+}
+
 const ResultsPage = () => {
   const router = useRouter();
   const params = useParams();
   const { data: session } = useSession();
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<TestResult | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,7 +120,7 @@ const ResultsPage = () => {
     loadResult();
   }, []);
 
-  const saveResultToBackend = async (resultData: any) => {
+  const saveResultToBackend = async (resultData: TestResult) => {
     // In a real app, save result to backend
     try {
       const response = await fetch('/api/test-results', {
@@ -106,12 +130,12 @@ const ResultsPage = () => {
         },
         body: JSON.stringify({
           userId: session?.user?.id,
-          realisticScore: resultData.scores.R,
-          investigativeScore: resultData.scores.I,
-          artisticScore: resultData.scores.A,
-          socialScore: resultData.scores.S,
-          enterprisingScore: resultData.scores.E,
-          conventionalScore: resultData.scores.C,
+          realisticScore: resultData.scores?.R || 0,
+          investigativeScore: resultData.scores?.I || 0,
+          artisticScore: resultData.scores?.A || 0,
+          socialScore: resultData.scores?.S || 0,
+          enterprisingScore: resultData.scores?.E || 0,
+          conventionalScore: resultData.scores?.C || 0,
           dominantType: resultData.dominantType,
           secondaryType: resultData.secondaryType,
           tertiaryType: resultData.tertiaryType,
@@ -174,12 +198,12 @@ const ResultsPage = () => {
           },
           body: JSON.stringify({
             userId: session.user.id,
-            realisticScore: result.scores.R,
-            investigativeScore: result.scores.I,
-            artisticScore: result.scores.A,
-            socialScore: result.scores.S,
-            enterprisingScore: result.scores.E,
-            conventionalScore: result.scores.C,
+            realisticScore: result.scores?.R || 0,
+            investigativeScore: result.scores?.I || 0,
+            artisticScore: result.scores?.A || 0,
+            socialScore: result.scores?.S || 0,
+            enterprisingScore: result.scores?.E || 0,
+            conventionalScore: result.scores?.C || 0,
             dominantType: result.dominantType,
             secondaryType: result.secondaryType,
             tertiaryType: result.tertiaryType,
@@ -211,9 +235,10 @@ const ResultsPage = () => {
   const handleShare = () => {
     // In a real app, implement sharing functionality
     if (navigator.share) {
+      const dominantTypeName = result?.dominantType ? riasecDescriptions[result.dominantType]?.name : 'Unknown';
       navigator.share({
         title: 'Hasil Tes Minat Bakat CareerConnect',
-        text: `Saya menyelesaikan tes RIASEC di CareerConnect! Tipe utama saya adalah ${riasecDescriptions[result?.dominantType]?.name}.`
+        text: `Saya menyelesaikan tes RIASEC di CareerConnect! Tipe utama saya adalah ${dominantTypeName}.`
       });
     } else {
       // Fallback for browsers that don't support Web Share API
@@ -312,11 +337,11 @@ const ResultsPage = () => {
               <div className="border rounded-lg p-4 bg-secondary/5">
                 <div className="text-center">
                   <Badge className="text-lg font-bold mb-2" variant="outline">
-                    {riasecDescriptions[result.secondaryType]?.name.split(' ')[0]}
+                    {result.secondaryType && riasecDescriptions[result.secondaryType]?.name ? riasecDescriptions[result.secondaryType]?.name.split(' ')[0] : 'N/A'}
                   </Badge>
                   <h3 className="font-bold text-lg mb-1">Tipe Kedua</h3>
                   <p className="text-sm text-muted-foreground">
-                    {riasecDescriptions[result.secondaryType]?.name}
+                    {result.secondaryType && riasecDescriptions[result.secondaryType]?.name ? riasecDescriptions[result.secondaryType]?.name : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -325,11 +350,11 @@ const ResultsPage = () => {
               <div className="border rounded-lg p-4 bg-accent">
                 <div className="text-center">
                   <Badge className="text-lg font-bold mb-2" variant="outline">
-                    {riasecDescriptions[result.tertiaryType]?.name.split(' ')[0]}
+                    {result.tertiaryType && riasecDescriptions[result.tertiaryType]?.name ? riasecDescriptions[result.tertiaryType]?.name.split(' ')[0] : 'N/A'}
                   </Badge>
                   <h3 className="font-bold text-lg mb-1">Tipe Ketiga</h3>
                   <p className="text-sm text-muted-foreground">
-                    {riasecDescriptions[result.tertiaryType]?.name}
+                    {result.tertiaryType && riasecDescriptions[result.tertiaryType]?.name ? riasecDescriptions[result.tertiaryType]?.name : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -375,7 +400,8 @@ const ResultsPage = () => {
               ) : (
                 // If using individual fields from database
                 ['R', 'I', 'A', 'S', 'E', 'C'].map(category => {
-                  const score = result[`${category.toLowerCase()}Score`];
+                  const scoreKey = `${category.toLowerCase()}Score` as keyof TestResult;
+                  const score = result[scoreKey] as number || 0;
                   const maxScore = Math.max(
                     result.realisticScore || 0,
                     result.investigativeScore || 0,
@@ -492,7 +518,7 @@ const ResultsPage = () => {
         {/* Test Info */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>Diselesaikan pada {new Date(result.completedAt).toLocaleString('id-ID')}</p>
-          <p>Waktu pengerjaan: {Math.floor(result.testDuration / 60)} menit {result.testDuration % 60} detik</p>
+          <p>Waktu pengerjaan: {Math.floor((result.testDuration || 0) / 60)} menit {(result.testDuration || 0) % 60} detik</p>
         </div>
       </div>
     </div>
