@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import { 
   BarChart3, 
   GraduationCap, 
@@ -13,14 +14,17 @@ import {
   Star, 
   Share2, 
   RotateCcw,
-  ArrowRight
+  ArrowRight,
+  Download
 } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
+import PdfResult from '@/components/pdf-result';
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 // RIASEC descriptions
 const riasecDescriptions: Record<string, { name: string, description: string, careers: string[] }> = {
   'R': {
-    name: 'Realistic (M)', 
+    name: 'Realistic (R)', 
     description: 'Orang dengan tipe Realistic menyukai kegiatan yang bersifat fisik, memanipulasi benda, mesin, alat dan hewan. Mereka cenderung praktis, stabil, dan mandiri.',
     careers: ['Teknik Mesin', 'Otomotif', 'Pertanian', 'Konstruksi', 'Perbengkelan']
   },
@@ -162,6 +166,30 @@ const ResultsPage = () => {
     }
 
     try {
+      // For demonstration purposes, use mock data if we're in dev and the result doesn't have scores
+      if (process.env.NODE_ENV === 'development' && resultId === '77c09eab-c992-4933-a585-955622369918') {
+        // Mock data for demonstration
+        const mockResult: TestResult = {
+          id: resultId,
+          userId: 'user-123',
+          dominantType: 'RIA',
+          secondaryType: 'I',
+          tertiaryType: 'A',
+          realisticScore: 18,
+          investigativeScore: 15,
+          artisticScore: 12,
+          socialScore: 8,
+          enterprisingScore: 7,
+          conventionalScore: 10,
+          testDuration: 1200,
+          totalQuestions: 50,
+          completedAt: new Date().toISOString()
+        };
+        setResult(mockResult);
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(`/api/test-results?id=${resultId}`);
       if (response.ok) {
         const data = await response.json();
@@ -286,6 +314,27 @@ const ResultsPage = () => {
     );
   }
 
+  // Helper function to format data for the chart
+  const getChartData = (result: TestResult) => {
+    if (result.scores) {
+      // If result.scores exists (temp result)
+      return Object.entries(result.scores).map(([category, score]) => ({
+        name: category,
+        score: score as number
+      }));
+    } else {
+      // If using individual fields from database
+      return [
+        { name: 'R', score: result.realisticScore ?? 0 },
+        { name: 'I', score: result.investigativeScore ?? 0 },
+        { name: 'A', score: result.artisticScore ?? 0 },
+        { name: 'S', score: result.socialScore ?? 0 },
+        { name: 'E', score: result.enterprisingScore ?? 0 },
+        { name: 'C', score: result.conventionalScore ?? 0 }
+      ];
+    }
+  };
+
   // Calculate total score for percentage calculations
   // If result.scores exists (temp result), use it, otherwise construct from individual fields
   const totalScore = result.scores 
@@ -382,51 +431,45 @@ const ResultsPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {result.scores ? (
-                // If result.scores exists (temp result)
-                Object.entries(result.scores).map(([category, score]) => (
-                  <div key={category} className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="font-medium">{riasecDescriptions[category]?.name}</span>
-                      <span className="font-bold">{score}</span>
-                    </div>
-                    <Progress 
-                      value={(score as number) / Math.max(...Object.values(result.scores as Record<string, number>)) * 100} 
-                      className="h-3"
-                    />
-                  </div>
-                ))
-              ) : (
-                // If using individual fields from database
-                ['R', 'I', 'A', 'S', 'E', 'C'].map(category => {
-                  const scoreKey = `${category.toLowerCase()}Score` as keyof TestResult;
-                  const score = result[scoreKey] as number || 0;
-                  const maxScore = Math.max(
-                    result.realisticScore || 0,
-                    result.investigativeScore || 0,
-                    result.artisticScore || 0,
-                    result.socialScore || 0,
-                    result.enterprisingScore || 0,
-                    result.conventionalScore || 0
-                  );
-                  const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
-                  
-                  return (
-                    <div key={category} className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="font-medium">{riasecDescriptions[category]?.name}</span>
-                        <span className="font-bold">{score}</span>
-                      </div>
-                      <Progress 
-                        value={percentage} 
-                        className="h-3"
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={getChartData(result)}
+                  layout="vertical"
+                  margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis 
+                    type="category" 
+                    dataKey="name" 
+                    width={80}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip 
+                    formatter={(value) => [value, 'Skor']}
+                    labelFormatter={(value) => riasecDescriptions[value as keyof typeof riasecDescriptions]?.name}
+                  />
+                  <Bar dataKey="score" name="Skor">
+                    {getChartData(result).map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={
+                          entry.name === 'R' ? '#8884d8' : 
+                          entry.name === 'I' ? '#83a6ed' : 
+                          entry.name === 'A' ? '#8dd1e1' : 
+                          entry.name === 'S' ? '#82ca9d' : 
+                          entry.name === 'E' ? '#a4de6c' : 
+                          '#d0ed57'
+                        }
                       />
-                    </div>
-                  );
-                })
-              )}
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
+            
           </CardContent>
         </Card>
 
@@ -501,6 +544,19 @@ const ResultsPage = () => {
             <Star className="h-4 w-4" />
             Simpan Hasil
           </Button>
+          {result && (
+            <PDFDownloadLink
+              document={<PdfResult result={result} studentName={session?.user?.name || 'Siswa'} />}
+              fileName={`hasil-tes-${result.id || 'baru'}.pdf`}
+            >
+              {({ loading }) => (
+                <Button className="flex items-center gap-2" disabled={loading}>
+                  <Download className="h-4 w-4" />
+                  {loading ? 'Menghasilkan...' : 'Unduh PDF'}
+                </Button>
+              )}
+            </PDFDownloadLink>
+          )}
           <Button variant="outline" onClick={handleShare} className="flex items-center gap-2">
             <Share2 className="h-4 w-4" />
             Bagikan

@@ -13,11 +13,14 @@ import {
   FileText,
   Plus,
   Clock,
-  Star
+  Star,
+  Download
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSession } from '@/lib/auth-client';
 import { EditProfileModal } from '@/components/edit-profile-modal';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import PdfDashboardSummary from '@/components/pdf-dashboard-summary';
 
 interface UserProfile {
   name: string;
@@ -202,10 +205,34 @@ const DashboardPage = () => {
             Welcome back, {userProfile?.name || session.user?.name}! Track your career journey.
           </p>
         </div>
-        <Button onClick={handleStartTest} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          New Assessment
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={handleStartTest} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            New Assessment
+          </Button>
+          {testResults && testResults.length > 0 && (
+            <PDFDownloadLink
+              document={
+                <PdfDashboardSummary 
+                  userProfile={{
+                    name: userProfile?.name || session.user?.name || 'User',
+                    school: userProfile?.school || null,
+                    grade: userProfile?.grade || null
+                  }}
+                  testResults={testResults}
+                />
+              }
+              fileName={`${userProfile?.name || session.user?.name || 'User'}-career-assessment-summary.pdf`}
+            >
+              {({ loading }) => (
+                <Button className="flex items-center gap-2" disabled={loading}>
+                  <Download className="h-4 w-4" />
+                  {loading ? 'Generating...' : 'Download PDF'}
+                </Button>
+              )}
+            </PDFDownloadLink>
+          )}
+        </div>
       </div>
 
       {/* Stats Cards */}
