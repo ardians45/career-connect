@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, Briefcase } from 'lucide-react';
+import { Search, Filter, Briefcase, Bookmark } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
+import { toast } from 'sonner';
 
 interface Career {
   id: string;
@@ -18,13 +19,15 @@ interface Career {
 }
 
 const CareersPage = () => {
-  const { data: session } = useSession();
   const [careers, setCareers] = useState<Career[]>([]);
   const [filteredCareers, setFilteredCareers] = useState<Career[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [industryFilter, setIndustryFilter] = useState('all');
   const [riasecFilter, setRiasecFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [bookmarkedCareers, setBookmarkedCareers] = useState<Set<string>>(new Set());
+  const { data: session, status } = useSession(); // Using proper session variable name
+  const [loadingBookmarks, setLoadingBookmarks] = useState(true);
 
   // Mock data - in a real app, this would come from an API
   useEffect(() => {
@@ -349,6 +352,118 @@ const CareersPage = () => {
     setFilteredCareers(result);
   }, [searchTerm, industryFilter, riasecFilter, careers]);
 
+  // Load bookmarked items from database on initial render
+  useEffect(() => {
+    const loadBookmarks = async () => {
+      if (status === 'authenticated' && session?.user?.id) {
+        setLoadingBookmarks(true);
+        try {
+          // In a real implementation, we'd fetch the user's bookmarks from the database
+          // For now, we'll just initialize the set
+          setBookmarkedCareers(new Set());
+        } catch (error) {
+          console.error('Error loading bookmarks:', error);
+        } finally {
+          setLoadingBookmarks(false);
+        }
+      } else {
+        setLoadingBookmarks(false);
+      }
+    };
+
+    loadBookmarks();
+  }, [status, session]);
+
+  // On initial load, also check for bookmarked items from session storage
+  useEffect(() => {
+    const loadBookmarksFromStorage = () => {
+      try {
+        const storedBookmarks = localStorage.getItem('bookmarkedCareers');
+        if (storedBookmarks) {
+          const parsedBookmarks = JSON.parse(storedBookmarks);
+          // Extract just the IDs for the Set since that's what the UI checks
+          const bookmarkIds = parsedBookmarks.map((b: any) => b.id);
+          setBookmarkedCareers(new Set(bookmarkIds));
+        } else {
+          setBookmarkedCareers(new Set());
+        }
+      } catch (error) {
+        console.error('Error loading bookmarks from storage:', error);
+        setBookmarkedCareers(new Set());
+      }
+    };
+
+    loadBookmarksFromStorage();
+  }, []);
+
+  // Toggle bookmark for a career
+  const toggleBookmark = async (career: Career) => {
+    // Optimistically update the UI
+    setBookmarkedCareers(prev => {
+      const newBookmarks = new Set(prev);
+      if (newBookmarks.has(career.id)) {
+        newBookmarks.delete(career.id);
+        console.log('Removing bookmark for career:', career.id);
+      } else {
+        newBookmarks.add(career.id);
+        console.log('Adding bookmark for career:', career.id);
+      }
+      return newBookmarks;
+    });
+    
+    try {
+      // Get current bookmarks from localStorage
+      const currentBookmarks = localStorage.getItem('bookmarkedCareers');
+      const currentBookmarkData = currentBookmarks ? JSON.parse(currentBookmarks) : [];
+      
+      // Create bookmark object with all necessary info for display
+      const bookmarkObject = {
+        id: career.id,
+        name: career.name,
+        description: career.description,
+        riasecTypes: career.riasecTypes,
+        industry: career.industry
+      };
+      
+      // Check if career is currently bookmarked
+      const existingIndex = currentBookmarkData.findIndex((b: any) => b.id === career.id);
+      let newBookmarkData;
+      
+      if (existingIndex >= 0) {
+        // Remove from bookmarks
+        newBookmarkData = currentBookmarkData.filter((b: any) => b.id !== career.id);
+      } else {
+        // Add to bookmarks
+        newBookmarkData = [...currentBookmarkData, bookmarkObject];
+      }
+      
+      // Update localStorage
+      localStorage.setItem('bookmarkedCareers', JSON.stringify(newBookmarkData));
+      
+      // Show success toast
+      if (existingIndex < 0) {
+        toast.success('Career bookmarked!');
+      } else {
+        toast.success('Bookmark removed');
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      // Rollback UI if there was an error
+      setBookmarkedCareers(prev => {
+        const newBookmarks = new Set(prev);
+        if (newBookmarks.has(career.id)) {
+          newBookmarks.delete(career.id);
+        } else {
+          newBookmarks.add(career.id);
+        }
+        return newBookmarks;
+      });
+      
+      // Show error toast
+      toast.error('Failed to update bookmark');
+    }
+  };
+
   // Get unique industries and RIASEC types for filter options
   const industries = Array.from(new Set(careers.map(career => career.industry)));
   const riasecTypes = Array.from(
@@ -441,6 +556,17 @@ const CareersPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>{career.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => toggleBookmark(career)}
+                    aria-label={bookmarkedCareers.has(career.id) ? "Hapus dari bookmark" : "Tambahkan ke bookmark"}
+                  >
+                    <Bookmark 
+                      className={`h-4 w-4 ${bookmarkedCareers.has(career.id) ? 'fill-current text-primary' : ''}`} 
+                    />
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">

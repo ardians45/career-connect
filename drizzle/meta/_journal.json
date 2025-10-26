@@ -15,6 +15,13 @@
       "when": 1760984845914,
       "tag": "0001_needy_venus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761311081736,
+      "tag": "0002_bored_xorn",
+      "breakpoints": true
     }
   ]
 }

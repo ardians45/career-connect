@@ -3,7 +3,7 @@
 import { pgTable, text, timestamp, boolean, integer, varchar } from "drizzle-orm/pg-core";
 import { relations } from 'drizzle-orm';
 // Impor tabel dari schema.ts untuk mendefinisikan relasi
-import { testResult, savedRecommendation, counselingSession } from './schema';
+import { testResult, savedRecommendation, counselingSession, bookmark } from './schema';
 
 // ============================================
 // AUTHENTICATION TABLES
@@ -78,6 +78,7 @@ export const userRelations = relations(user, ({ many }) => ({
     savedRecommendations: many(savedRecommendation),
     counselingSessionsAsTeacher: many(counselingSession, { relationName: 'teacher' }),
     counselingSessionsAsStudent: many(counselingSession, { relationName: 'student' }),
+    bookmarks: many(bookmark),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({

@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, GraduationCap } from 'lucide-react';
+import { Search, Filter, GraduationCap, Bookmark } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
+import { toast } from 'sonner';
 
 interface Major {
   id: string;
@@ -19,13 +20,15 @@ interface Major {
 }
 
 const MajorsPage = () => {
-  const { data: session } = useSession();
   const [majors, setMajors] = useState<Major[]>([]);
   const [filteredMajors, setFilteredMajors] = useState<Major[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [riasecFilter, setRiasecFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [bookmarkedMajors, setBookmarkedMajors] = useState<Set<string>>(new Set());
+  const { data: session, status } = useSession(); // Using proper session variable name
+  const [loadingBookmarks, setLoadingBookmarks] = useState(true);
 
   // Mock data - in a real app, this would come from an API
   useEffect(() => {
@@ -266,6 +269,118 @@ const MajorsPage = () => {
     setFilteredMajors(result);
   }, [searchTerm, categoryFilter, riasecFilter, majors]);
 
+  // Load bookmarked items from database on initial render
+  useEffect(() => {
+    const loadBookmarks = async () => {
+      if (status === 'authenticated' && session?.user?.id) {
+        setLoadingBookmarks(true);
+        try {
+          // In a real implementation, we'd fetch the user's bookmarks from the database
+          // For now, we'll just initialize the set
+          setBookmarkedMajors(new Set());
+        } catch (error) {
+          console.error('Error loading bookmarks:', error);
+        } finally {
+          setLoadingBookmarks(false);
+        }
+      } else {
+        setLoadingBookmarks(false);
+      }
+    };
+
+    loadBookmarks();
+  }, [status, session]);
+
+  // On initial load, also check for bookmarked items from session storage
+  useEffect(() => {
+    const loadBookmarksFromStorage = () => {
+      try {
+        const storedBookmarks = localStorage.getItem('bookmarkedMajors');
+        if (storedBookmarks) {
+          const parsedBookmarks = JSON.parse(storedBookmarks);
+          // Extract just the IDs for the Set since that's what the UI checks
+          const bookmarkIds = parsedBookmarks.map((b: any) => b.id);
+          setBookmarkedMajors(new Set(bookmarkIds));
+        } else {
+          setBookmarkedMajors(new Set());
+        }
+      } catch (error) {
+        console.error('Error loading bookmarks from storage:', error);
+        setBookmarkedMajors(new Set());
+      }
+    };
+
+    loadBookmarksFromStorage();
+  }, []);
+
+  // Toggle bookmark for a major
+  const toggleBookmark = async (major: Major) => {
+    // Optimistically update the UI
+    setBookmarkedMajors(prev => {
+      const newBookmarks = new Set(prev);
+      if (newBookmarks.has(major.id)) {
+        newBookmarks.delete(major.id);
+        console.log('Removing bookmark for major:', major.id);
+      } else {
+        newBookmarks.add(major.id);
+        console.log('Adding bookmark for major:', major.id);
+      }
+      return newBookmarks;
+    });
+    
+    try {
+      // Get current bookmarks from localStorage
+      const currentBookmarks = localStorage.getItem('bookmarkedMajors');
+      const currentBookmarkData = currentBookmarks ? JSON.parse(currentBookmarks) : [];
+      
+      // Create bookmark object with all necessary info for display
+      const bookmarkObject = {
+        id: major.id,
+        name: major.name,
+        description: major.description,
+        riasecTypes: major.riasecTypes,
+        degreeLevel: major.degreeLevel
+      };
+      
+      // Check if major is currently bookmarked
+      const existingIndex = currentBookmarkData.findIndex((b: any) => b.id === major.id);
+      let newBookmarkData;
+      
+      if (existingIndex >= 0) {
+        // Remove from bookmarks
+        newBookmarkData = currentBookmarkData.filter((b: any) => b.id !== major.id);
+      } else {
+        // Add to bookmarks
+        newBookmarkData = [...currentBookmarkData, bookmarkObject];
+      }
+      
+      // Update localStorage
+      localStorage.setItem('bookmarkedMajors', JSON.stringify(newBookmarkData));
+      
+      // Show success toast
+      if (existingIndex < 0) {
+        toast.success('Major bookmarked!');
+      } else {
+        toast.success('Bookmark removed');
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      // Rollback UI if there was an error
+      setBookmarkedMajors(prev => {
+        const newBookmarks = new Set(prev);
+        if (newBookmarks.has(major.id)) {
+          newBookmarks.delete(major.id);
+        } else {
+          newBookmarks.add(major.id);
+        }
+        return newBookmarks;
+      });
+      
+      // Show error toast
+      toast.error('Failed to update bookmark');
+    }
+  };
+
   // Get unique categories and RIASEC types for filter options
   const categories = Array.from(new Set(majors.map(major => major.category)));
   const riasecTypes = Array.from(
@@ -358,7 +473,20 @@ const MajorsPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>{major.name}</span>
-                  <Badge variant="secondary">{major.degreeLevel}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{major.degreeLevel}</Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => toggleBookmark(major)}
+                      aria-label={bookmarkedMajors.has(major.id) ? "Hapus dari bookmark" : "Tambahkan ke bookmark"}
+                    >
+                      <Bookmark 
+                        className={`h-4 w-4 ${bookmarkedMajors.has(major.id) ? 'fill-current text-primary' : ''}`} 
+                      />
+                    </Button>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
@@ -368,7 +496,16 @@ const MajorsPage = () => {
                   <Badge variant="outline">{major.category}</Badge>
                 </div>
                 <div className="mt-auto">
-                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      // In a real app, this would navigate to the specific major page
+                      console.log(`View details for ${major.name}`);
+                    }}
+                  >
+                    Lihat Detail
+                  </Button>
                 </div>
               </CardContent>
             </Card>

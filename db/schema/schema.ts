@@ -1,6 +1,6 @@
 // Lokasi: /src/lib/db/schema.ts
 
-import { pgTable, text, timestamp, integer, varchar, boolean, jsonb, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, varchar, boolean, jsonb, primaryKey, unique } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 // Impor tabel 'user' dari file auth.ts untuk referensi
 import { user } from './auth';
@@ -37,6 +37,18 @@ export const testQuestion = pgTable('test_question', {
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
+
+// Table for storing user bookmarks
+export const bookmark = pgTable('bookmark', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+    itemId: text('item_id').notNull(), // Can be majorId or careerId
+    itemType: text('item_type').notNull(), // 'major' or 'career'
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+    // Ensure unique combination of userId, itemId, and itemType
+    uniqueBookmark: unique().on(table.userId, table.itemId, table.itemType),
+}));
 
 export const major = pgTable('major', {
     id: text('id').primaryKey(),
@@ -145,6 +157,13 @@ export const savedRecommendationRelations = relations(savedRecommendation, ({ on
     testResult: one(testResult, {
         fields: [savedRecommendation.testResultId],
         references: [testResult.id],
+    }),
+}));
+
+export const bookmarkRelations = relations(bookmark, ({ one }) => ({
+    user: one(user, {
+        fields: [bookmark.userId],
+        references: [user.id],
     }),
 }));
 
