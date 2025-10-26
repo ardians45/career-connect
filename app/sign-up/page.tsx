@@ -16,11 +16,11 @@ import { signUp } from "@/lib/auth-client";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const signUpSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
+    name: z.string().min(2, "Nama harus memiliki setidaknya 2 karakter"),
+    email: z.string().email("Alamat email tidak valid"),
     password: z
         .string()
-        .min(8, "Password must be at least 8 characters")
+        .min(8, "Kata sandi harus memiliki setidaknya 8 karakter")
         .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
     confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -59,12 +59,12 @@ export default function SignUpPage() {
             });
 
             if (result.error) {
-                setError(result.error.message || "Sign up failed");
+                setError(result.error.message || "Pendaftaran gagal");
             } else {
                 router.push("/dashboard");
             }
         } catch (err) {
-            setError("An unexpected error occurred");
+            setError("Terjadi kesalahan tak terduga");
         } finally {
             setIsLoading(false);
         }
@@ -74,9 +74,9 @@ export default function SignUpPage() {
         <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
+                    <CardTitle className="text-2xl font-bold">Buat Akun</CardTitle>
                     <CardDescription>
-                        Enter your details to create a new account
+                        Masukkan data Anda untuk membuat akun baru
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -93,10 +93,10 @@ export default function SignUpPage() {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Full Name</FormLabel>
+                                        <FormLabel>Nama Lengkap</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="Enter your full name"
+                                                placeholder="Masukkan nama lengkap Anda"
                                                 {...field}
                                                 disabled={isLoading}
                                             />
@@ -115,7 +115,7 @@ export default function SignUpPage() {
                                         <FormControl>
                                             <Input
                                                 type="email"
-                                                placeholder="Enter your email"
+                                                placeholder="Masukkan email Anda"
                                                 {...field}
                                                 disabled={isLoading}
                                             />
@@ -130,12 +130,12 @@ export default function SignUpPage() {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>Kata Sandi</FormLabel>
                                         <FormControl>
                                             <div className="relative">
                                                 <Input
                                                     type={showPassword ? "text" : "password"}
-                                                    placeholder="Create a strong password"
+                                                    placeholder="Buat kata sandi yang kuat"
                                                     {...field}
                                                     disabled={isLoading}
                                                     className="pr-10"
@@ -166,12 +166,12 @@ export default function SignUpPage() {
                                 name="confirmPassword"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Confirm Password</FormLabel>
+                                        <FormLabel>Konfirmasi Kata Sandi</FormLabel>
                                         <FormControl>
                                             <div className="relative">
                                                 <Input
                                                     type={showConfirmPassword ? "text" : "password"}
-                                                    placeholder="Confirm your password"
+                                                    placeholder="Konfirmasi kata sandi Anda"
                                                     {...field}
                                                     disabled={isLoading}
                                                     className="pr-10"
@@ -201,10 +201,10 @@ export default function SignUpPage() {
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Creating account...
+                                        Membuat akun...
                                     </>
                                 ) : (
-                                    "Create Account"
+                                    "Buat Akun"
                                 )}
                             </Button>
                         </form>
@@ -212,9 +212,9 @@ export default function SignUpPage() {
                 </CardContent>
                 <CardFooter className="text-center">
                     <p className="text-sm text-muted-foreground">
-                        Already have an account?{" "}
+                        Sudah punya akun?{" "}
                         <Link href="/sign-in" className="font-medium text-primary hover:underline">
-                            Sign in
+                            Masuk
                         </Link>
                     </p>
                 </CardFooter>

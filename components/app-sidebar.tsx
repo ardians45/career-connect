@@ -47,27 +47,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Navigation items with functional links
   const navMain = [
     {
-      title: "Dashboard",
+      title: "Dasbor",
       url: "/dashboard",
       icon: IconDashboard,
     },
     {
-      title: "Test History",
+      title: "Riwayat Tes",
       url: "/test-history",
       icon: IconHistory,
     },
     {
-      title: "Majors",
+      title: "Jurusan",
       url: "/majors",
       icon: IconSchool,
     },
     {
-      title: "Careers",
+      title: "Karir",
       url: "/careers",
       icon: IconBriefcase,
     },
     {
-      title: "Recommendations",
+      title: "Rekomendasi",
       url: "/recommendations",
       icon: IconFileDescription,
     },
@@ -75,12 +75,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const navSecondary = [
     {
-      title: "Settings",
+      title: "Pengaturan",
       url: "/settings",
       icon: IconSettings,
     },
     {
-      title: "Help",
+      title: "Bantuan",
       url: "/help",
       icon: IconHelp,
     },

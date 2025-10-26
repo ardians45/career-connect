@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ interface Career {
 }
 
 const RecommendationsPage = () => {
+  const router = useRouter();
   const [bookmarkedMajors, setBookmarkedMajors] = useState<any[]>([]); // We'll fetch real data
   const [bookmarkedCareers, setBookmarkedCareers] = useState<any[]>([]); // We'll fetch real data
   const [loading, setLoading] = useState(true);
@@ -156,7 +158,7 @@ const RecommendationsPage = () => {
                       variant="outline" 
                       className="w-full"
                       onClick={() => {
-                        console.log(`View details for ${major.name}`);
+                        router.push(`/majors/${major.id}`);
                       }}
                     >
                       Lihat Detail
@@ -218,7 +220,7 @@ const RecommendationsPage = () => {
                       variant="outline" 
                       className="w-full"
                       onClick={() => {
-                        console.log(`View details for ${career.name}`);
+                        router.push(`/careers/${career.id}`);
                       }}
                     >
                       Lihat Detail

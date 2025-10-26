@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,7 @@ interface Career {
 }
 
 const CareersPage = () => {
+  const router = useRouter();
   const [careers, setCareers] = useState<Career[]>([]);
   const [filteredCareers, setFilteredCareers] = useState<Career[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -580,8 +582,7 @@ const CareersPage = () => {
                     variant="outline" 
                     className="w-full"
                     onClick={() => {
-                      // In a real app, this would navigate to the specific career page
-                      console.log(`View details for ${career.name}`);
+                      router.push(`/careers/${career.id}`);
                     }}
                   >
                     Lihat Detail

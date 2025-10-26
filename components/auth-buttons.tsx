@@ -75,7 +75,7 @@ export function AuthButtons() {
           <DropdownMenuItem asChild>
             <Link href="/dashboard">
               <User className="mr-2 h-4 w-4" />
-              Dashboard
+              Dasbor
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -84,7 +84,7 @@ export function AuthButtons() {
             disabled={isSigningOut}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            {isSigningOut ? "Signing out..." : "Sign out"}
+            {isSigningOut ? "Sedang keluar..." : "Keluar"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -96,13 +96,13 @@ export function AuthButtons() {
       <Button asChild variant="ghost" size="sm">
         <Link href="/sign-in">
           <LogIn className="mr-2 h-4 w-4" />
-          Sign In
+          Masuk
         </Link>
       </Button>
       <Button asChild size="sm">
         <Link href="/sign-up">
           <UserPlus className="mr-2 h-4 w-4" />
-          Sign Up
+          Daftar
         </Link>
       </Button>
     </div>
@@ -128,7 +128,7 @@ export function HeroAuthButtons() {
         <Button asChild size="lg" className="text-base px-8 py-3">
           <Link href="/dashboard">
             <User className="mr-2 h-5 w-5" />
-            Go to Dashboard
+            Ke Dasbor
           </Link>
         </Button>
       </div>
@@ -140,13 +140,13 @@ export function HeroAuthButtons() {
       <Button asChild size="lg" className="text-base px-8 py-3">
         <Link href="/sign-up">
           <UserPlus className="mr-2 h-5 w-5" />
-          Get Started
+          Mulai Sekarang
         </Link>
       </Button>
       <Button asChild variant="outline" size="lg" className="text-base px-8 py-3">
         <Link href="/sign-in">
           <LogIn className="mr-2 h-5 w-5" />
-          Sign In
+          Masuk
         </Link>
       </Button>
     </div>

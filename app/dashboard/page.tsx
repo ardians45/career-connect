@@ -83,7 +83,7 @@ const DashboardPage = () => {
     const fetchDashboardData = async () => {
       if (session && session.user) {
         try {
-          // Fetch actual dashboard data from API
+          // Fetch dashboard data from API (excluding saved recommendations which will come from localStorage)
           const response = await fetch(`/api/dashboard/${session.user.id}`);
           if (response.ok) {
             const data = await response.json();
@@ -115,7 +115,6 @@ const DashboardPage = () => {
             }
             
             setTestResults(data.testResults || []);
-            setSavedRecommendations(data.savedRecommendations || []);
             setTotalAssessments(data.totalAssessments || 0);
             setTotalAssessmentsGrowth(data.totalAssessmentsGrowth || 0);
             
@@ -146,7 +145,6 @@ const DashboardPage = () => {
             console.error('Failed to fetch dashboard data:', response.status, response.statusText);
             // Set default values in case of failure
             setTestResults([]);
-            setSavedRecommendations([]);
             setTotalAssessments(0);
             setTotalAssessmentsGrowth(0);
             setProfileCompletion(0);
@@ -155,7 +153,6 @@ const DashboardPage = () => {
           console.error('Error fetching dashboard data:', error);
           // Set default values in case of error
           setTestResults([]);
-          setSavedRecommendations([]);
           setTotalAssessments(0);
           setTotalAssessmentsGrowth(0);
           setProfileCompletion(0);
@@ -170,6 +167,70 @@ const DashboardPage = () => {
     fetchDashboardData();
   }, [session]);
 
+  // Load saved recommendations from localStorage to match the recommendations page
+  useEffect(() => {
+    if (!session) return;
+    
+    const loadBookmarks = () => {
+      try {
+        // Load bookmarked major objects from localStorage
+        const storedMajorBookmarks = localStorage.getItem('bookmarkedMajors');
+        const majorBookmarks = storedMajorBookmarks ? JSON.parse(storedMajorBookmarks) : [];
+        
+        // Load bookmarked career objects from localStorage
+        const storedCareerBookmarks = localStorage.getItem('bookmarkedCareers');
+        const careerBookmarks = storedCareerBookmarks ? JSON.parse(storedCareerBookmarks) : [];
+        
+        // Convert major bookmarks to saved recommendations format
+        const majorRecommendations = majorBookmarks.map((major: any) => ({
+          id: `major-${major.id}`,
+          recommendationType: 'major' as const,
+          recommendationId: major.id,
+          majorName: major.name,
+          majorDescription: major.description,
+          savedAt: major.savedAt || new Date().toISOString(),
+        }));
+        
+        // Convert career bookmarks to saved recommendations format
+        const careerRecommendations = careerBookmarks.map((career: any) => ({
+          id: `career-${career.id}`,
+          recommendationType: 'career' as const,
+          recommendationId: career.id,
+          careerTitle: career.name,
+          careerDescription: career.description,
+          careerIndustry: career.industry,
+          savedAt: career.savedAt || new Date().toISOString(),
+        }));
+        
+        // Combine both into the saved recommendations array
+        const allRecommendations = [...majorRecommendations, ...careerRecommendations];
+        
+        // Sort by savedAt in descending order (newest first)
+        allRecommendations.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
+        
+        setSavedRecommendations(allRecommendations);
+      } catch (error) {
+        console.error('Error loading bookmarks from localStorage:', error);
+        setSavedRecommendations([]);
+      }
+    };
+
+    // Load initial data
+    loadBookmarks();
+    
+    // Set up event listener for storage changes so the dashboard updates when bookmarks change
+    const handleStorageChange = () => {
+      loadBookmarks();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Clean up listener
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [session]);
+
   const handleStartTest = () => {
     router.push('/test');
   };
@@ -179,7 +240,19 @@ const DashboardPage = () => {
   };
 
   const handleViewRecommendation = (id: string) => {
-    router.push(`/recommendations/${id}`);
+    // Determine if this is a major or career recommendation based on the savedRecommendations state
+    const recommendation = savedRecommendations.find(rec => rec.recommendationId === id);
+    
+    if (recommendation) {
+      if (recommendation.recommendationType === 'major') {
+        router.push(`/majors/${id}`);
+      } else {
+        router.push(`/careers/${id}`);
+      }
+    } else {
+      // Fallback: if we can't determine the type, navigate to the generic recommendation page
+      router.push(`/recommendations/${id}`);
+    }
   };
 
   useEffect(() => {
@@ -200,15 +273,15 @@ const DashboardPage = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Dasbor</h1>
           <p className="text-muted-foreground">
-            Welcome back, {userProfile?.name || session.user?.name}! Track your career journey.
+            Selamat datang kembali, {userProfile?.name || session.user?.name}! Lacak perjalanan karir Anda.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={handleStartTest} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            New Assessment
+            Penilaian Baru
           </Button>
           {testResults && testResults.length > 0 && (
             <PDFDownloadLink
@@ -227,7 +300,7 @@ const DashboardPage = () => {
               {({ loading }) => (
                 <Button className="flex items-center gap-2" disabled={loading}>
                   <Download className="h-4 w-4" />
-                  {loading ? 'Generating...' : 'Download PDF'}
+                  {loading ? 'Menghasilkan...' : 'Unduh PDF'}
                 </Button>
               )}
             </PDFDownloadLink>
@@ -239,45 +312,45 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Assessments</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Penilaian</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalAssessments}</div>
-            <p className="text-xs text-muted-foreground">+{totalAssessmentsGrowth} from last month</p>
+            <p className="text-xs text-muted-foreground">+{totalAssessmentsGrowth} dari bulan lalu</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Dominant Type</CardTitle>
+            <CardTitle className="text-sm font-medium">Tipe Dominan</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{recentTest?.dominantType || 'N/A'}</div>
-            <p className="text-xs text-muted-foreground">Most recent result</p>
+            <p className="text-xs text-muted-foreground">Hasil terbaru</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Saved Recommendations</CardTitle>
+            <CardTitle className="text-sm font-medium">Rekomendasi Tersimpan</CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{savedRecommendations.length}</div>
-            <p className="text-xs text-muted-foreground">Career & education paths</p>
+            <p className="text-xs text-muted-foreground">Jalur karir & pendidikan</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Profile Completion</CardTitle>
+            <CardTitle className="text-sm font-medium">Kelengkapan Profil</CardTitle>
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{profileCompletion}%</div>
-            <p className="text-xs text-muted-foreground">Complete your profile</p>
+            <p className="text-xs text-muted-foreground">Lengkapi profil Anda</p>
           </CardContent>
         </Card>
       </div>
@@ -290,14 +363,14 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Recent Test Results
+                  Hasil Tes Terbaru
                 </CardTitle>
                 <Button variant="outline" size="sm" onClick={() => router.push('/test-history')}>
-                  View All
+                  Lihat Semua
                 </Button>
               </div>
               <CardDescription>
-                Your latest RIASEC assessments and results
+                Penilaian dan hasil RIASEC terbaru Anda
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -309,10 +382,10 @@ const DashboardPage = () => {
                     onClick={() => handleViewResult(test.id)}
                   >
                     <div>
-                      <h3 className="font-semibold">RIASEC Career Assessment</h3>
+                      <h3 className="font-semibold">Penilaian Karir RIASEC</h3>
                       <p className="text-sm text-muted-foreground">
                         <Clock className="inline h-3 w-3 mr-1" />
-                        {new Date(test.completedAt).toLocaleDateString()} • Type: {[
+                        {new Date(test.completedAt).toLocaleDateString()} • Tipe: {[
                           test.dominantType,
                           test.secondaryType,
                           test.tertiaryType
@@ -331,7 +404,7 @@ const DashboardPage = () => {
                         )}%
                       </Badge>
                       <Button variant="outline" size="sm">
-                        View
+                        Lihat
                       </Button>
                     </div>
                   </div>
@@ -346,37 +419,37 @@ const DashboardPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Your Profile
+              Profil Anda
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">Name</p>
+                <p className="text-sm text-muted-foreground">Nama</p>
                 <p className="font-medium">{userProfile?.name || session.user?.name}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">School</p>
-                <p className="font-medium">{userProfile?.school || 'Not specified'}</p>
+                <p className="text-sm text-muted-foreground">Sekolah</p>
+                <p className="font-medium">{userProfile?.school || 'Tidak disebutkan'}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Grade</p>
-                <p className="font-medium">{userProfile?.grade || 'Not specified'}</p>
+                <p className="text-sm text-muted-foreground">Kelas</p>
+                <p className="font-medium">{userProfile?.grade || 'Tidak disebutkan'}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Phone</p>
-                <p className="font-medium">{userProfile?.phone || 'Not specified'}</p>
+                <p className="text-sm text-muted-foreground">Telepon</p>
+                <p className="font-medium">{userProfile?.phone || 'Tidak disebutkan'}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Last Assessment</p>
-                <p className="font-medium">{userProfile?.lastTestDate || 'Never'}</p>
+                <p className="text-sm text-muted-foreground">Penilaian Terakhir</p>
+                <p className="font-medium">{userProfile?.lastTestDate || 'Tidak pernah'}</p>
               </div>
               <Button 
                 variant="outline" 
                 className="w-full mt-4" 
                 onClick={() => setIsEditProfileModalOpen(true)}
               >
-                Edit Profile
+                Edit Profil
               </Button>
             </div>
           </CardContent>
@@ -396,109 +469,199 @@ const DashboardPage = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Star className="h-5 w-5" />
-              Saved Recommendations
+              Rekomendasi Tersimpan
             </CardTitle>
             <Button variant="outline" size="sm" onClick={() => router.push('/recommendations')}>
-              View All
+              Lihat Semua
             </Button>
           </div>
           <CardDescription>
-            Career paths and majors you&#39;ve saved based on your test results
+            Jalur karir dan jurusan yang telah Anda simpan berdasarkan hasil tes
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="majors">Majors</TabsTrigger>
-              <TabsTrigger value="careers">Careers</TabsTrigger>
+              <TabsTrigger value="all">Semua</TabsTrigger>
+              <TabsTrigger value="majors">Jurusan</TabsTrigger>
+              <TabsTrigger value="careers">Karir</TabsTrigger>
             </TabsList>
             <TabsContent value="all" className="mt-4 space-y-4">
-              {savedRecommendations.map((rec) => {
-                const isMajor = rec.recommendationType === 'major';
-                return (
-                  <div 
-                    key={rec.id} 
-                    className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => handleViewRecommendation(rec.recommendationId)}
+              {isLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <p className="text-muted-foreground">Memuat rekomendasi...</p>
+                </div>
+              ) : savedRecommendations.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Star className="h-10 w-10 text-muted-foreground mb-2" />
+                  <h3 className="font-semibold">Belum ada rekomendasi tersimpan</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Simpan jurusan atau karir yang Anda minati dari halaman rekomendasi
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-4"
+                    onClick={() => router.push('/majors')}
                   >
-                    <div className="flex items-start gap-4">
-                      <div className={`p-2 rounded-lg ${isMajor ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                        {isMajor ? <GraduationCap className="h-5 w-5" /> : <Briefcase className="h-5 w-5" />}
+                    Jelajahi Jurusan
+                  </Button>
+                </div>
+              ) : (
+                savedRecommendations.map((rec) => {
+                  const isMajor = rec.recommendationType === 'major';
+                  return (
+                    <div 
+                      key={rec.id} 
+                      className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => handleViewRecommendation(rec.recommendationId)}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={`p-2 rounded-lg ${isMajor ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                          {isMajor ? <GraduationCap className="h-5 w-5" /> : <Briefcase className="h-5 w-5" />}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{isMajor ? rec.majorName : rec.careerTitle}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {isMajor ? 'Jurusan' : rec.careerIndustry}
+                          </p>
+                          <p className="text-sm mt-1">{isMajor ? rec.majorDescription : rec.careerDescription}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold">{isMajor ? rec.majorName : rec.careerTitle}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {isMajor ? 'Major' : rec.careerIndustry}
-                        </p>
-                        <p className="text-sm mt-1">{isMajor ? rec.majorDescription : rec.careerDescription}</p>
+                      <div className="flex flex-col items-end">
+                        <Badge variant="outline">Disimpan {new Date(rec.savedAt).toLocaleDateString()}</Badge>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewRecommendation(rec.recommendationId);
+                          }}
+                        >
+                          Detail
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <Badge variant="outline">Saved {new Date(rec.savedAt).toLocaleDateString()}</Badge>
-                      <Button variant="outline" size="sm" className="mt-2">
-                        Details
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </TabsContent>
             <TabsContent value="majors" className="mt-4 space-y-4">
-              {savedRecommendations
-                .filter(rec => rec.recommendationType === 'major')
-                .map((rec) => (
-                  <div 
-                    key={rec.id} 
-                    className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => handleViewRecommendation(rec.recommendationId)}
+              {isLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <p className="text-muted-foreground">Memuat jurusan...</p>
+                </div>
+              ) : savedRecommendations.filter(rec => rec.recommendationType === 'major').length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <GraduationCap className="h-10 w-10 text-muted-foreground mb-2" />
+                  <h3 className="font-semibold">Belum ada jurusan tersimpan</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Simpan jurusan yang Anda minati dari halaman jurusan
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-4"
+                    onClick={() => router.push('/majors')}
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="p-2 rounded-lg bg-blue-100 text-blue-800">
-                        <GraduationCap className="h-5 w-5" />
+                    Jelajahi Jurusan
+                  </Button>
+                </div>
+              ) : (
+                savedRecommendations
+                  .filter(rec => rec.recommendationType === 'major')
+                  .map((rec) => (
+                    <div 
+                      key={rec.id} 
+                      className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => handleViewRecommendation(rec.recommendationId)}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-blue-100 text-blue-800">
+                          <GraduationCap className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{rec.majorName}</h3>
+                          <p className="text-sm text-muted-foreground">Jurusan</p>
+                          <p className="text-sm mt-1">{rec.majorDescription}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold">{rec.majorName}</h3>
-                        <p className="text-sm text-muted-foreground">Major</p>
-                        <p className="text-sm mt-1">{rec.majorDescription}</p>
+                      <div className="flex flex-col items-end">
+                        <Badge variant="outline">Disimpan {new Date(rec.savedAt).toLocaleDateString()}</Badge>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewRecommendation(rec.recommendationId);
+                          }}
+                        >
+                          Detail
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <Badge variant="outline">Saved {new Date(rec.savedAt).toLocaleDateString()}</Badge>
-                      <Button variant="outline" size="sm" className="mt-2">
-                        Details
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+              )}
             </TabsContent>
             <TabsContent value="careers" className="mt-4 space-y-4">
-              {savedRecommendations
-                .filter(rec => rec.recommendationType === 'career')
-                .map((rec) => (
-                  <div 
-                    key={rec.id} 
-                    className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => handleViewRecommendation(rec.recommendationId)}
+              {isLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <p className="text-muted-foreground">Memuat karir...</p>
+                </div>
+              ) : savedRecommendations.filter(rec => rec.recommendationType === 'career').length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Briefcase className="h-10 w-10 text-muted-foreground mb-2" />
+                  <h3 className="font-semibold">Belum ada karir tersimpan</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Simpan karir yang Anda minati dari halaman karir
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-4"
+                    onClick={() => router.push('/careers')}
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="p-2 rounded-lg bg-green-100 text-green-800">
-                        <Briefcase className="h-5 w-5" />
+                    Jelajahi Karir
+                  </Button>
+                </div>
+              ) : (
+                savedRecommendations
+                  .filter(rec => rec.recommendationType === 'career')
+                  .map((rec) => (
+                    <div 
+                      key={rec.id} 
+                      className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => handleViewRecommendation(rec.recommendationId)}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-green-100 text-green-800">
+                          <Briefcase className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{rec.careerTitle}</h3>
+                          <p className="text-sm text-muted-foreground">{rec.careerIndustry}</p>
+                          <p className="text-sm mt-1">{rec.careerDescription}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold">{rec.careerTitle}</h3>
-                        <p className="text-sm text-muted-foreground">{rec.careerIndustry}</p>
-                        <p className="text-sm mt-1">{rec.careerDescription}</p>
+                      <div className="flex flex-col items-end">
+                        <Badge variant="outline">Disimpan {new Date(rec.savedAt).toLocaleDateString()}</Badge>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewRecommendation(rec.recommendationId);
+                          }}
+                        >
+                          Detail
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <Badge variant="outline">Saved {new Date(rec.savedAt).toLocaleDateString()}</Badge>
-                      <Button variant="outline" size="sm" className="mt-2">
-                        Details
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>

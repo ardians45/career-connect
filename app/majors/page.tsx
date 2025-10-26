@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,7 @@ interface Major {
 }
 
 const MajorsPage = () => {
+  const router = useRouter();
   const [majors, setMajors] = useState<Major[]>([]);
   const [filteredMajors, setFilteredMajors] = useState<Major[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -500,8 +502,7 @@ const MajorsPage = () => {
                     variant="outline" 
                     className="w-full"
                     onClick={() => {
-                      // In a real app, this would navigate to the specific major page
-                      console.log(`View details for ${major.name}`);
+                      router.push(`/majors/${major.id}`);
                     }}
                   >
                     Lihat Detail

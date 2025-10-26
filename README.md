@@ -1,249 +1,270 @@
-# Codeguide Starter Fullstack
+# Career Connect
 
-A modern web application starter template built with Next.js 15, featuring authentication, database integration, and dark mode support.
+Career Connect adalah platform modern yang dirancang untuk membantu siswa dalam pemilihan jurusan dan karier yang sesuai dengan minat, bakat, dan potensi mereka. Platform ini menyediakan berbagai fitur untuk membantu pengguna dalam mengeksplorasi karier, mengikuti kuis minat karier, serta memperoleh rekomendasi jurusan yang sesuai.
 
-## Tech Stack
+## Teknologi yang Digunakan
 
-- **Framework:** [Next.js 15](https://nextjs.org/) (App Router with Turbopack)
-- **Language:** TypeScript
-- **Authentication:** [Better Auth](https://better-auth.com/)
-- **Database:** [Drizzle ORM](https://orm.drizzle.team/) with PostgreSQL
+- **Framework:** [Next.js 15](https://nextjs.org/) (App Router dengan Turbopack)
+- **Bahasa:** TypeScript
+- **Otentikasi:** [Better Auth](https://better-auth.com/)
+- **Database:** [Drizzle ORM](https://orm.drizzle.team/) dengan PostgreSQL
 - **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
-- **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (New York style)
-- **Theme System:** [next-themes](https://github.com/pacocoursey/next-themes)
-- **Icons:** [Lucide React](https://lucide.dev/)
+- **Komponen UI:** [shadcn/ui](https://ui.shadcn.com/) (gaya New York)
+- **Sistem Tema:** [next-themes](https://github.com/pacocoursey/next-themes)
+- **Ikon:** [Lucide React](https://lucide.dev/)
+- **Visualisasi Data:** [Recharts](https://recharts.org/)
 
-## Prerequisites
+## Prasyarat
 
-Before you begin, ensure you have the following:
-- Node.js 18+ installed
-- Docker and Docker Compose (for database setup)
-- Generated project documents from [CodeGuide](https://codeguide.dev/) for best development experience
+Sebelum memulai, pastikan Anda memiliki hal-hal berikut:
+- Node.js 18+ terinstal
+- Docker dan Docker Compose (untuk pengaturan database)
+- Project documents dari [CodeGuide](https://codeguide.dev/) untuk pengalaman pengembangan terbaik
 
-## Getting Started
+## Cara Memulai
 
-1. **Clone the repository**
+1. **Clone repositori**
    ```bash
-   git clone <repository-url>
-   cd codeguide-starter-fullstack
+   git clone <url-repositori>
+   cd career-connect
    ```
 
-2. **Install dependencies**
+2. **Instal dependensi**
    ```bash
    npm install
-   # or
+   # atau
    yarn install
-   # or
+   # atau
    pnpm install
    ```
 
-3. **Environment Variables Setup**
-   - Copy the `.env.example` file to `.env`:
+3. **Pengaturan Variabel Lingkungan**
+   - Salin file `.env.example` ke `.env`:
      ```bash
      cp .env.example .env
      ```
-   - The default values work with Docker setup, modify as needed
+   - Nilai default bekerja dengan pengaturan Docker, ubah sesuai kebutuhan
 
-4. **Start the development server**
+4. **Jalankan server pengembangan**
    ```bash
    npm run dev
-   # or
+   # atau
    yarn dev
-   # or
+   # atau
    pnpm dev
    ```
 
-5. **Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.**
+5. **Buka [http://localhost:3000](http://localhost:3000) di browser Anda untuk melihat hasilnya.**
 
-## Configuration
+## Konfigurasi
 
-### Option 1: Docker Setup (Recommended)
-1. **Start PostgreSQL with Docker:**
+### Opsi 1: Pengaturan Docker (Disarankan)
+1. **Jalankan PostgreSQL dengan Docker:**
    ```bash
-   npm run db:up
+   npm run db:dev
    ```
-   This starts PostgreSQL in a Docker container with default credentials.
+   Ini akan menjalankan PostgreSQL dalam kontainer Docker dengan kredensial default pada port 5433.
 
-2. **Push database schema:**
+2. **Terapkan skema database:**
    ```bash
    npm run db:push
    ```
 
-### Option 2: Local Database Setup
-1. Create a PostgreSQL database locally
-2. Update your environment variables in `.env`:
+### Opsi 2: Pengaturan Database Lokal
+1. Buat database PostgreSQL secara lokal
+2. Perbarui variabel lingkungan Anda di `.env`:
    ```env
    DATABASE_URL=postgresql://username:password@localhost:5432/database_name
-   POSTGRES_DB=your_database_name
-   POSTGRES_USER=your_username
-   POSTGRES_PASSWORD=your_password
+   POSTGRES_DB=nama_database_anda
+   POSTGRES_USER=nama_pengguna
+   POSTGRES_PASSWORD=kata_sandi
    ```
-3. Run database migrations:
+3. Jalankan migrasi database:
    ```bash
    npm run db:push
    ```
 
-## Environment Variables
+## Variabel Lingkungan
 
-Create a `.env` file in the root directory with the following variables:
+Buat file `.env` di direktori root dengan variabel berikut:
 
 ```env
-# Database Configuration (defaults work with Docker)
+# Konfigurasi Database (default bekerja dengan Docker)
 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/postgres
 POSTGRES_DB=postgres
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 
-# Authentication
-BETTER_AUTH_SECRET=your_secret_key_here
+# Otentikasi
+BETTER_AUTH_SECRET=kunci_rahasia_anda_disini
 BETTER_AUTH_URL=http://localhost:3000
 NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
 ```
 
-## Features
+## Fitur-Fitur
 
-- 🔐 Authentication with Better Auth (email/password)
-- 🗄️ PostgreSQL Database with Drizzle ORM
-- 🎨 40+ shadcn/ui components (New York style)
-- 🌙 Dark mode with system preference detection
-- 🚀 App Router with Server Components and Turbopack
-- 📱 Responsive design with TailwindCSS v4
-- 🎯 Type-safe database operations
-- 🔒 Modern authentication patterns
-- 🐳 Full Docker support with multi-stage builds
-- 🚀 Production-ready deployment configuration
+- 🔐 Otentikasi dengan Better Auth (email/kata sandi)
+- 🗄️ Database PostgreSQL dengan Drizzle ORM
+- 🎨 40+ komponen shadcn/ui (gaya New York)
+- 🌙 Mode gelap dengan deteksi preferensi sistem
+- 🚀 App Router dengan Server Components dan Turbopack
+- 📱 Desain responsif dengan TailwindCSS v4
+- 🎯 Operasi database yang aman secara tipe
+- 🔒 Pola otentikasi modern
+- 🐳 Dukungan penuh Docker dengan build multi-tahap
+- 🚀 Konfigurasi deployment siap produksi
 
-## Project Structure
+## Fitur Utama Career Connect
+
+- 📊 **Kuis Minat Karier**: Kuis interaktif untuk mengevaluasi minat dan bakat pengguna
+- 🎯 **Rekomendasi Jurusan**: Rekomendasi jurusan yang disesuaikan berdasarkan hasil kuis
+- 💼 **Eksplorasi Karier**: Informasi mendalam tentang berbagai karier dan bidang pekerjaan
+- 📈 **Analisis Data**: Visualisasi dan analisis data karier untuk pengambilan keputusan yang lebih baik
+- 👥 **Manajemen Profil**: Fitur untuk mengelola informasi profil pengguna
+- 📚 **Sumber Daya Pendidikan**: Kumpulan sumber daya untuk membantu dalam pemilihan jurusan
+
+## Struktur Proyek
 
 ```
-codeguide-starter-fullstack/
-├── app/                        # Next.js app router pages
-│   ├── globals.css            # Global styles with dark mode
-│   ├── layout.tsx             # Root layout with providers
-│   └── page.tsx               # Main page
-├── components/                # React components
-│   └── ui/                    # shadcn/ui components (40+)
-├── db/                        # Database configuration
-│   ├── index.ts              # Database connection
-│   └── schema/               # Database schemas
-├── docker/                    # Docker configuration
+career-connect/
+├── app/                        # Halaman Next.js app router
+│   ├── api/                    # Endpoint API
+│   ├── auth/                   # Halaman otentikasi
+│   ├── dashboard/              # Dashboard pengguna
+│   ├── careers/                # Eksplorasi karier
+│   ├── recommendations/        # Rekomendasi jurusan
+│   ├── quiz/                   # Kuis minat karier
+│   ├── profile/                # Manajemen profil
+│   ├── globals.css            # Gaya global dengan mode gelap
+│   ├── layout.tsx             # Layout root dengan provider
+│   └── page.tsx               # Halaman utama
+├── components/                # Komponen React
+│   ├── ui/                    # Komponen shadcn/ui (40+)
+│   ├── auth/                  # Komponen otentikasi
+│   ├── charts/                # Komponen visualisasi data
+│   └── navigation/            # Komponen navigasi
+├── db/                        # Konfigurasi database
+│   ├── index.ts              # Koneksi database
+│   └── schema/               # Skema database
+├── docker/                    # Konfigurasi Docker
 │   └── postgres/             # PostgreSQL initialization
-├── hooks/                     # Custom React hooks
-├── lib/                       # Utility functions
-│   ├── auth.ts               # Better Auth configuration
-│   └── utils.ts              # General utilities
-├── auth-schema.ts            # Authentication schema
-├── docker-compose.yml        # Docker services configuration
-├── Dockerfile                # Application container definition
-├── drizzle.config.ts         # Drizzle configuration
-└── components.json           # shadcn/ui configuration
+├── hooks/                     # Hooks React kustom
+├── lib/                       # Fungsi utilitas
+│   ├── auth.ts               # Konfigurasi Better Auth
+│   └── utils.ts              # Utilitas umum
+├── types/                     # Definisi tipe TypeScript
+├── auth-schema.ts            # Skema otentikasi
+├── docker-compose.yml        # Konfigurasi layanan Docker
+├── Dockerfile                # Definisi kontainer aplikasi
+├── drizzle.config.ts         # Konfigurasi Drizzle
+└── components.json           # Konfigurasi shadcn/ui
 ```
 
-## Database Integration
+## Integrasi Database
 
-This starter includes modern database integration:
+Proyek ini mencakup integrasi database modern:
 
-- **Drizzle ORM** for type-safe database operations
-- **PostgreSQL** as the database provider
-- **Better Auth** integration with Drizzle adapter
-- **Database migrations** with Drizzle Kit
+- **Drizzle ORM** untuk operasi database yang aman secara tipe
+- **PostgreSQL** sebagai penyedia database
+- **Integrasi Better Auth** dengan adapter Drizzle
+- **Migrasi database** dengan Drizzle Kit
 
-## Development Commands
+## Perintah Pengembangan
 
-### Application
-- `npm run dev` - Start development server with Turbopack
-- `npm run build` - Build for production with Turbopack
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
+### Aplikasi
+- `npm run dev` - Jalankan server pengembangan dengan Turbopack
+- `npm run build` - Build untuk produksi dengan Turbopack
+- `npm start` - Jalankan server produksi
+- `npm run lint` - Jalankan ESLint
 
 ### Database
-- `npm run db:up` - Start PostgreSQL in Docker
-- `npm run db:down` - Stop PostgreSQL container
-- `npm run db:dev` - Start development PostgreSQL (port 5433)
-- `npm run db:dev-down` - Stop development PostgreSQL
-- `npm run db:push` - Push schema changes to database
-- `npm run db:generate` - Generate Drizzle migration files
-- `npm run db:studio` - Open Drizzle Studio (database GUI)
-- `npm run db:reset` - Reset database (drop all tables and recreate)
+- `npm run db:up` - Jalankan PostgreSQL di Docker
+- `npm run db:down` - Hentikan kontainer PostgreSQL
+- `npm run db:dev` - Jalankan PostgreSQL pengembangan (port 5433)
+- `npm run db:dev-down` - Hentikan PostgreSQL pengembangan
+- `npm run db:push` - Terapkan perubahan skema ke database
+- `npm run db:generate` - Hasilkan file migrasi Drizzle
+- `npm run db:studio` - Buka Drizzle Studio (GUI database)
+- `npm run db:reset` - Reset database (hapus semua tabel dan buat kembali)
 
-### Styling with shadcn/ui
-- Pre-configured with 40+ shadcn/ui components in New York style
-- Components are fully customizable and use CSS variables for theming
-- Automatic dark mode support with next-themes integration
-- Add new components: `npx shadcn@latest add [component-name]`
+### Styling dengan shadcn/ui
+- Dikonfigurasi dengan 40+ komponen shadcn/ui dalam gaya New York
+- Komponen sepenuhnya dapat disesuaikan dan menggunakan variabel CSS untuk theming
+- Dukungan mode gelap otomatis dengan integrasi next-themes
+- Tambahkan komponen baru: `npx shadcn@latest add [nama-komponen]`
 
 ### Docker
-- `npm run docker:build` - Build application Docker image
-- `npm run docker:up` - Start full application stack (app + database)
-- `npm run docker:down` - Stop all containers
-- `npm run docker:logs` - View container logs
-- `npm run docker:clean` - Stop containers and clean up volumes
+- `npm run docker:build` - Build image Docker aplikasi
+- `npm run docker:up` - Jalankan stack aplikasi lengkap (app + database)
+- `npm run docker:down` - Hentikan semua kontainer
+- `npm run docker:logs` - Lihat log kontainer
+- `npm run docker:clean` - Hentikan kontainer dan bersihkan volume
 
-## Docker Development
+## Pengembangan Docker
 
-### Quick Start with Docker
+### Memulai dengan Docker
 ```bash
-# Start the entire stack (recommended for new users)
+# Jalankan seluruh stack (disarankan untuk pengguna baru)
 npm run docker:up
 
-# View logs
+# Lihat log
 npm run docker:logs
 
-# Stop everything
+# Hentikan semuanya
 npm run docker:down
 ```
 
-### Development Workflow
+### Alur Kerja Pengembangan
 ```bash
-# Option 1: Database only (develop app locally)
-npm run db:up          # Start PostgreSQL
-npm run dev            # Start Next.js development server
+# Opsi 1: Database saja (kembangkan aplikasi secara lokal)
+npm run db:up          # Jalankan PostgreSQL
+npm run dev            # Jalankan server pengembangan Next.js
 
-# Option 2: Full Docker stack
-npm run docker:up      # Start both app and database
+# Opsi 2: Stack Docker lengkap
+npm run docker:up      # Jalankan aplikasi dan database
 ```
 
-### Docker Services
+### Layanan Docker
 
-The `docker-compose.yml` includes:
+`docker-compose.yml` mencakup:
 
-- **postgres**: Main PostgreSQL database (port 5432)
-- **postgres-dev**: Development database (port 5433) - use `--profile dev`
-- **app**: Next.js application container (port 3000)
+- **postgres**: Database PostgreSQL utama (port 5432)
+- **postgres-dev**: Database pengembangan (port 5433) - gunakan `--profile dev`
+- **app**: Kontainer aplikasi Next.js (port 3000)
 
-### Docker Profiles
+### Profil Docker
 
 ```bash
-# Start development database on port 5433
+# Jalankan database pengembangan di port 5433
 docker-compose --profile dev up postgres-dev -d
 
-# Or use the npm script
+# Atau gunakan skrip npm
 npm run db:dev
 ```
 
 ## Deployment
 
-### Production Deployment
+### Deployment Produksi
 
-#### Option 1: Docker Compose (VPS/Server)
+#### Opsi 1: Docker Compose (VPS/Server)
 
-1. **Clone and setup on your server:**
+1. **Clone dan setup di server Anda:**
    ```bash
-   git clone <your-repo>
-   cd codeguide-starter-fullstack
+   git clone <repositori-anda>
+   cd career-connect
    cp .env.example .env
    ```
 
-2. **Configure environment variables:**
+2. **Konfigurasi variabel lingkungan:**
    ```bash
-   # Edit .env with production values
-   DATABASE_URL=postgresql://postgres:your_secure_password@postgres:5432/postgres
+   # Edit .env dengan nilai produksi
+   DATABASE_URL=postgresql://postgres:kata_sandi_amankan@postgres:5432/postgres
    POSTGRES_DB=postgres
    POSTGRES_USER=postgres
-   POSTGRES_PASSWORD=your_secure_password
-   BETTER_AUTH_SECRET=your-very-secure-secret-key
-   BETTER_AUTH_URL=https://yourdomain.com
-   NEXT_PUBLIC_BETTER_AUTH_URL=https://yourdomain.com
+   POSTGRES_PASSWORD=kata_sandi_amankan
+   BETTER_AUTH_SECRET=kunci_rahasia_sangat_amankan
+   BETTER_AUTH_URL=https://domainanda.com
+   NEXT_PUBLIC_BETTER_AUTH_URL=https://domainanda.com
    ```
 
 3. **Deploy:**
@@ -251,79 +272,82 @@ npm run db:dev
    npm run docker:up
    ```
 
-#### Option 2: Container Registry (AWS/GCP/Azure)
+#### Opsi 2: Registry Container (AWS/GCP/Azure)
 
-1. **Build and push image:**
+1. **Build dan push image:**
    ```bash
-   # Build the image
-   docker build -t your-registry/codeguide-starter-fullstack:latest .
+   # Build image
+   docker build -t registry-anda/career-connect:latest .
    
-   # Push to registry
-   docker push your-registry/codeguide-starter-fullstack:latest
+   # Push ke registry
+   docker push registry-anda/career-connect:latest
    ```
 
-2. **Deploy using your cloud provider's container service**
+2. **Deploy menggunakan layanan container dari penyedia cloud Anda**
 
-#### Option 3: Vercel + External Database
+#### Opsi 3: Vercel + Database Eksternal
 
-1. **Deploy to Vercel:**
+1. **Deploy ke Vercel:**
    ```bash
    npm i -g vercel
    vercel
    ```
 
-2. **Add environment variables in Vercel dashboard:**
-   - `DATABASE_URL`: Your managed PostgreSQL connection string
-   - `BETTER_AUTH_SECRET`: Generate a secure secret
-   - `BETTER_AUTH_URL`: Your Vercel deployment URL
+2. **Tambahkan variabel lingkungan di dashboard Vercel:**
+   - `DATABASE_URL`: String koneksi PostgreSQL yang dikelola
+   - `BETTER_AUTH_SECRET`: Generate secret yang aman
+   - `BETTER_AUTH_URL`: URL deployment Vercel Anda
 
 3. **Setup database:**
    ```bash
-   # Push schema to your managed database
+   # Terapkan skema ke database yang dikelola Anda
    npm run db:push
    ```
 
-### Environment Variables for Production
+### Variabel Lingkungan untuk Produksi
 
 ```env
-# Required for production
+# Diperlukan untuk produksi
 DATABASE_URL=postgresql://user:password@host:port/database
-BETTER_AUTH_SECRET=generate-a-very-secure-32-character-key
-BETTER_AUTH_URL=https://yourdomain.com
+BETTER_AUTH_SECRET=generate-kunci-32-karakter-yang-sangat-aman
+BETTER_AUTH_URL=https://domainanda.com
 
-# Optional optimizations
+# Optimasi opsional
 NODE_ENV=production
 ```
 
-### Production Considerations
+### Pertimbangan Produksi
 
-- **Database**: Use managed PostgreSQL (AWS RDS, Google Cloud SQL, etc.)
-- **Security**: Generate strong secrets, use HTTPS
-- **Performance**: Enable Next.js output: 'standalone' for smaller containers
-- **Monitoring**: Add logging and health checks
-- **Backup**: Regular database backups
-- **SSL**: Terminate SSL at load balancer or reverse proxy
+- **Database**: Gunakan PostgreSQL yang dikelola (AWS RDS, Google Cloud SQL, dll.)
+- **Keamanan**: Generate secret yang kuat, gunakan HTTPS
+- **Performa**: Aktifkan Next.js output: 'standalone' untuk kontainer yang lebih kecil
+- **Monitoring**: Tambahkan logging dan health check
+- **Backup**: Backup database secara reguler
+- **SSL**: Terminasi SSL di load balancer atau reverse proxy
 
-### Health Checks
+### Health Check
 
-The application includes basic health checks. You can extend them:
+Aplikasi ini mencakup health check dasar. Anda dapat memperluasnya:
 
 ```dockerfile
-# In Dockerfile, add health check
+# Di Dockerfile, tambahkan health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 ```
 
-## AI Coding Agent Integration
+## Integrasi AI Coding Agent
 
-This starter is optimized for AI coding agents:
+Template starter ini dioptimalkan untuk agen coding AI:
 
-- **Clear file structure** and naming conventions
-- **TypeScript integration** with proper type definitions
-- **Modern authentication** patterns
-- **Database schema** examples
+- **Struktur file yang jelas** dan konvensi penamaan
+- **Integrasi TypeScript** dengan definisi tipe yang tepat
+- **Pola otentikasi modern**
+- **Contoh skema database**
 
-## Contributing
+## Kontribusi
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-# codeguide-starter-fullstack
+Kontribusi sangat dipersilakan! Silakan kirim Pull Request jika Anda ingin berkontribusi.
+
+## Lisensi
+
+Proyek ini dilisensikan di bawah Lisensi MIT - lihat file [LICENSE](LICENSE) untuk detail selengkapnya.
