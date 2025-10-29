@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 const parkinsans = Parkinsans({
   variable: "--font-parkinsans",
   subsets: ["latin"],
+  weight: ["400"], // Specify the weight for Parkinsans (default is 400)
 });
 
 export const metadata: Metadata = {

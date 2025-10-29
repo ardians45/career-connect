@@ -11,10 +11,12 @@ import {
   BarChart3, 
   Eye,
   RotateCcw,
-  Star
+  Star,
+  Trash
 } from 'lucide-react';
 import { useSession } from '@/lib/auth-client';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface TestResult {
   id: string;
@@ -40,6 +42,8 @@ const TestHistoryPage = () => {
   const { data: session, isPending } = useSession();
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   useEffect(() => {
     const fetchTestHistory = async () => {
@@ -91,6 +95,44 @@ const TestHistoryPage = () => {
     router.push('/test');
   };
 
+  const handleDeleteTest = async (id: string) => {
+    if (!session?.user?.id) return;
+
+    try {
+      const response = await fetch(`/api/test-results?id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setTestResults(testResults.filter(result => result.id !== id));
+      } else {
+        console.error('Failed to delete test result:', response.status);
+      }
+    } catch (error) {
+      console.error('Error deleting test result:', error);
+    }
+  };
+
+  const confirmDeleteTest = (id: string) => {
+    setDeletingId(id);
+    setIsConfirmingDelete(true);
+  };
+
+  const cancelDeleteTest = () => {
+    setDeletingId(null);
+    setIsConfirmingDelete(false);
+  };
+
+  const executeDeleteTest = () => {
+    if (deletingId) {
+      handleDeleteTest(deletingId);
+      cancelDeleteTest();
+    }
+  };
+
   const getDominantTypeLabel = (type: string) => {
     switch (type) {
       case 'R': return 'Realistic';
@@ -128,6 +170,25 @@ const TestHistoryPage = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isConfirmingDelete} onOpenChange={setIsConfirmingDelete}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Konfirmasi Hapus Tes</DialogTitle>
+            <DialogDescription>
+              Apakah Anda yakin ingin menghapus hasil tes ini? Tindakan ini tidak dapat dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={cancelDeleteTest}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={executeDeleteTest}>
+              Hapus
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="flex items-center gap-4">
         
         <div>
@@ -241,17 +302,30 @@ const TestHistoryPage = () => {
                       </div>
                     </div>
                     
-                    <Button 
-                      variant="outline" 
-                      className="w-full mt-4"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent card click event
-                        handleViewResult(result.id);
-                      }}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Lihat Detail
-                    </Button>
+                    <div className="flex gap-2 mt-4">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card click event
+                          handleViewResult(result.id);
+                        }}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Lihat Detail
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card click event
+                          confirmDeleteTest(result.id);
+                        }}
+                      >
+                        <Trash className="h-4 w-4" />
+                        <span className="sr-only">Hapus Tes</span>
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

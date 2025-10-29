@@ -21,45 +21,50 @@ import {
 
 // Mock test questions data
 const mockQuestions = [
+  // Realistic (4 questions)
   {
     id: 1,
-    text: "Saya suka bekerja dengan alat dan mesin",
+    text: "Saya menikmati bekerja dengan alat dan mesin",
     category: 'R' // Realistic
   },
   {
     id: 2,
+    text: "Saya senang melakukan kegiatan yang membutuhkan keterampilan tangan",
+    category: 'R'
+  },
+  {
+    id: 3,
+    text: "Saya tertarik pada pekerjaan teknis atau kerajinan tangan",
+    category: 'R'
+  },
+  {
+    id: 4,
+    text: "Saya senang memperbaiki atau merakit barang-barang",
+    category: 'R'
+  },
+  
+  // Investigative (3 questions)
+  {
+    id: 5,
     text: "Saya menikmati menganalisis data dan informasi",
     category: 'I' // Investigative
   },
   {
-    id: 3,
-    text: "Saya tertarik pada seni dan desain kreatif",
-    category: 'A' // Artistic
-  },
-  {
-    id: 4,
-    text: "Saya suka membantu orang dalam menyelesaikan masalah",
-    category: 'S' // Social
-  },
-  {
-    id: 5,
-    text: "Saya percaya diri dalam memimpin proyek atau tim",
-    category: 'E' // Enterprising
-  },
-  {
     id: 6,
-    text: "Saya menyukai pekerjaan yang terstruktur dan terorganisir",
-    category: 'C' // Conventional
+    text: "Saya tertarik pada riset ilmiah dan eksperimen",
+    category: 'I'
   },
   {
     id: 7,
-    text: "Saya senang bekerja di luar ruangan atau lingkungan fisik",
-    category: 'R'
+    text: "Saya suka memecahkan masalah dengan pendekatan logis",
+    category: 'I'
   },
+  
+  // Artistic (3 questions)
   {
     id: 8,
-    text: "Saya tertarik pada riset ilmiah dan eksperimen",
-    category: 'I'
+    text: "Saya tertarik pada seni dan desain kreatif",
+    category: 'A' // Artistic
   },
   {
     id: 9,
@@ -68,8 +73,64 @@ const mockQuestions = [
   },
   {
     id: 10,
+    text: "Saya merasa bebas dan kreatif dalam mengekspresikan diri",
+    category: 'A'
+  },
+  
+  // Social (3 questions)
+  {
+    id: 11,
+    text: "Saya suka membantu orang dalam menyelesaikan masalah",
+    category: 'S' // Social
+  },
+  {
+    id: 12,
     text: "Saya merasa puas ketika berhasil membimbing orang lain",
     category: 'S'
+  },
+  {
+    id: 13,
+    text: "Saya senang mengajar atau melatih orang lain",
+    category: 'S'
+  },
+  
+  // Enterprising (4 questions)
+  {
+    id: 14,
+    text: "Saya percaya diri dalam memimpin proyek atau tim",
+    category: 'E' // Enterprising
+  },
+  {
+    id: 15,
+    text: "Saya suka bernegosiasi untuk mencapai kesepakatan",
+    category: 'E'
+  },
+  {
+    id: 16,
+    text: "Saya merasa nyaman berbicara di depan umum",
+    category: 'E'
+  },
+  {
+    id: 17,
+    text: "Saya tertarik pada pekerjaan yang melibatkan persuasi",
+    category: 'E'
+  },
+  
+  // Conventional (3 questions)
+  {
+    id: 18,
+    text: "Saya menyukai pekerjaan yang terstruktur dan terorganisir",
+    category: 'C' // Conventional
+  },
+  {
+    id: 19,
+    text: "Saya merasa nyaman dengan tugas administrasi dan data",
+    category: 'C'
+  },
+  {
+    id: 20,
+    text: "Saya suka bekerja dengan angka dan informasi terperinci",
+    category: 'C'
   }
 ];
 
