@@ -11,10 +11,19 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --only=production --omit=dev
 
+# Install dev dependencies for build steps
+FROM base AS buildDeps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+# Copy build dependencies to get dev dependencies needed for build steps
+COPY --from=buildDeps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Drizzle schema
