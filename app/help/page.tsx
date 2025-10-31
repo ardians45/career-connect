@@ -113,7 +113,7 @@ export default function HelpPage() {
             <AccordionItem value="item-2">
               <AccordionTrigger>Bagaimana cara mengikuti tes minat bakat?</AccordionTrigger>
               <AccordionContent>
-                Untuk mengikuti tes minat bakat, cukup klik menu "Dasbor" dan pilih opsi "Ikuti Tes". 
+                Untuk mengikuti tes minat bakat, cukup klik menu &quot;Dasbor&quot; dan pilih opsi &quot;Ikuti Tes&quot;. 
                 Anda akan diminta untuk menjawab sejumlah pertanyaan tentang minat dan preferensi Anda. 
                 Setelah selesai, sistem akan memberikan hasil serta rekomendasi jurusan dan karir yang 
                 sesuai.
@@ -124,7 +124,7 @@ export default function HelpPage() {
               <AccordionTrigger>Apakah hasil tes disimpan?</AccordionTrigger>
               <AccordionContent>
                 Ya, hasil tes Anda akan disimpan secara aman di sistem kami. Anda dapat mengakses 
-                riwayat tes Anda kapan saja melalui menu "Riwayat Tes". Setiap hasil tes akan 
+                riwayat tes Anda kapan saja melalui menu &quot;Riwayat Tes&quot;. Setiap hasil tes akan 
                 menyimpan tanggal dan skor yang Anda dapatkan.
               </AccordionContent>
             </AccordionItem>

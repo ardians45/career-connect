@@ -21,7 +21,7 @@ import {
 
 // Mock test questions data
 const mockQuestions = [
-  // Realistic (4 questions)
+  // Realistic (R) - 7 questions
   {
     id: 1,
     text: "Saya menikmati bekerja dengan alat dan mesin",
@@ -42,94 +42,194 @@ const mockQuestions = [
     text: "Saya senang memperbaiki atau merakit barang-barang",
     category: 'R'
   },
-  
-  // Investigative (3 questions)
   {
     id: 5,
+    text: "Saya merasa nyaman saat bekerja di luar ruangan",
+    category: 'R'
+  },
+  {
+    id: 6,
+    text: "Saya suka dengan pekerjaan yang memiliki hasil nyata dan terukur",
+    category: 'R'
+  },
+  {
+    id: 7,
+    text: "Saya tertarik pada pekerjaan yang menggunakan kekuatan fisik",
+    category: 'R'
+  },
+  
+  // Investigative (I) - 7 questions
+  {
+    id: 8,
     text: "Saya menikmati menganalisis data dan informasi",
     category: 'I' // Investigative
   },
   {
-    id: 6,
+    id: 9,
     text: "Saya tertarik pada riset ilmiah dan eksperimen",
     category: 'I'
   },
   {
-    id: 7,
+    id: 10,
     text: "Saya suka memecahkan masalah dengan pendekatan logis",
     category: 'I'
   },
-  
-  // Artistic (3 questions)
   {
-    id: 8,
+    id: 11,
+    text: "Saya tertarik pada pekerjaan yang membutuhkan pemikiran mendalam",
+    category: 'I'
+  },
+  {
+    id: 12,
+    text: "Saya merasa puas ketika memahami konsep yang kompleks",
+    category: 'I'
+  },
+  {
+    id: 13,
+    text: "Saya senang meneliti informasi sebelum membuat keputusan",
+    category: 'I'
+  },
+  {
+    id: 14,
+    text: "Saya tertarik pada pekerjaan yang membutuhkan observasi teliti",
+    category: 'I'
+  },
+  
+  // Artistic (A) - 7 questions
+  {
+    id: 15,
     text: "Saya tertarik pada seni dan desain kreatif",
     category: 'A' // Artistic
   },
   {
-    id: 9,
+    id: 16,
     text: "Saya senang mengekspresikan ide melalui seni atau tulisan",
     category: 'A'
   },
   {
-    id: 10,
+    id: 17,
     text: "Saya merasa bebas dan kreatif dalam mengekspresikan diri",
     category: 'A'
   },
-  
-  // Social (3 questions)
   {
-    id: 11,
+    id: 18,
+    text: "Saya tertarik pada pekerjaan yang memungkinkan ekspresi pribadi",
+    category: 'A'
+  },
+  {
+    id: 19,
+    text: "Saya suka mengubah ide menjadi karya nyata",
+    category: 'A'
+  },
+  {
+    id: 20,
+    text: "Saya merasa nyaman dalam lingkungan kerja yang fleksibel",
+    category: 'A'
+  },
+  {
+    id: 21,
+    text: "Saya senang dengan pekerjaan yang tidak terikat aturan ketat",
+    category: 'A'
+  },
+  
+  // Social (S) - 6 questions
+  {
+    id: 22,
     text: "Saya suka membantu orang dalam menyelesaikan masalah",
     category: 'S' // Social
   },
   {
-    id: 12,
+    id: 23,
     text: "Saya merasa puas ketika berhasil membimbing orang lain",
     category: 'S'
   },
   {
-    id: 13,
+    id: 24,
     text: "Saya senang mengajar atau melatih orang lain",
     category: 'S'
   },
-  
-  // Enterprising (4 questions)
   {
-    id: 14,
+    id: 25,
+    text: "Saya tertarik pada pekerjaan yang berhubungan langsung dengan orang",
+    category: 'S'
+  },
+  {
+    id: 26,
+    text: "Saya suka berdiskusi untuk membantu seseorang memahami masalahnya",
+    category: 'S'
+  },
+  {
+    id: 27,
+    text: "Saya merasa bahagia ketika dapat membuat orang lain termotivasi",
+    category: 'S'
+  },
+  
+  // Enterprising (E) - 7 questions
+  {
+    id: 28,
     text: "Saya percaya diri dalam memimpin proyek atau tim",
     category: 'E' // Enterprising
   },
   {
-    id: 15,
+    id: 29,
     text: "Saya suka bernegosiasi untuk mencapai kesepakatan",
     category: 'E'
   },
   {
-    id: 16,
+    id: 30,
     text: "Saya merasa nyaman berbicara di depan umum",
     category: 'E'
   },
   {
-    id: 17,
+    id: 31,
     text: "Saya tertarik pada pekerjaan yang melibatkan persuasi",
     category: 'E'
   },
-  
-  // Conventional (3 questions)
   {
-    id: 18,
+    id: 32,
+    text: "Saya senang mengambil tanggung jawab dalam proyek penting",
+    category: 'E'
+  },
+  {
+    id: 33,
+    text: "Saya merasa tertantang dalam situasi kompetitif",
+    category: 'E'
+  },
+  {
+    id: 34,
+    text: "Saya tertarik pada pekerjaan yang berhubungan dengan pengambilan keputusan",
+    category: 'E'
+  },
+  
+  // Conventional (C) - 6 questions
+  {
+    id: 35,
     text: "Saya menyukai pekerjaan yang terstruktur dan terorganisir",
     category: 'C' // Conventional
   },
   {
-    id: 19,
+    id: 36,
     text: "Saya merasa nyaman dengan tugas administrasi dan data",
     category: 'C'
   },
   {
-    id: 20,
+    id: 37,
     text: "Saya suka bekerja dengan angka dan informasi terperinci",
+    category: 'C'
+  },
+  {
+    id: 38,
+    text: "Saya merasa aman dalam lingkungan kerja yang teratur",
+    category: 'C'
+  },
+  {
+    id: 39,
+    text: "Saya suka mengikuti prosedur dan aturan yang telah ditetapkan",
+    category: 'C'
+  },
+  {
+    id: 40,
+    text: "Saya tertarik pada pekerjaan yang membutuhkan ketelitian tinggi",
     category: 'C'
   }
 ];
@@ -149,7 +249,7 @@ const TestPage = () => {
   const { data: session } = useSession();
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(300); // 5 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(3600); // 1 hour in seconds
   const [isTestStarted, setIsTestStarted] = useState(false);
   const [isGuestMode, setIsGuestMode] = useState(false);
 
@@ -328,7 +428,8 @@ const TestPage = () => {
               <h3 className="font-semibold">Tentang Tes Ini:</h3>
               <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
                 <li>Tes ini terdiri dari {mockQuestions.length} pertanyaan</li>
-                <li>Anda akan diberi waktu 5 menit untuk menyelesaikan tes</li>
+                <li>Anda akan diberi waktu 1 jam untuk menyelesaikan tes</li>
+                <li>Semua pertanyaan harus dijawab sebelum dapat menyelesaikan tes</li>
                 <li>Jawab sesuai dengan minat dan preferensi Anda</li>
                 <li>Hasil akan menunjukkan tipe kepribadian RIASEC Anda</li>
               </ul>
@@ -466,7 +567,9 @@ const TestPage = () => {
               </Button>
               <Button 
                 onClick={handleNextQuestion}
-                disabled={answers[currentQ.id] === undefined}
+                disabled={answers[currentQ.id] === undefined || 
+                  (currentQuestion === mockQuestions.length - 1 && 
+                  Object.keys(answers).length < mockQuestions.length)}
               >
                 {currentQuestion === mockQuestions.length - 1 ? 'Selesai' : 'Selanjutnya'}
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -485,6 +588,7 @@ const TestPage = () => {
                   size="sm"
                   onClick={() => setCurrentQuestion(index)}
                   className="h-8"
+                  disabled={index > 0 && answers[mockQuestions[index-1].id] === undefined && index > currentQuestion}
                 >
                   {index + 1}
                   {answers[mockQuestions[index].id] !== undefined && (
