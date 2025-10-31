@@ -53,7 +53,7 @@ export const auth = betterAuth({
         }
     },
     secret: process.env.BETTER_AUTH_SECRET,
-    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
     session: {
         expiresIn: 7 * 24 * 60 * 60,
         updateAge: 24 * 60 * 60,
