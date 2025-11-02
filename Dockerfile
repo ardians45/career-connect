@@ -51,8 +51,8 @@ RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'ls -la /app' >> /app/startup.sh && \
     echo '' >> /app/startup.sh && \
     echo 'echo "Menjalankan migrasi database..."' >> /app/startup.sh && \
-    # Jalankan migrasi
-    echo 'npx drizzle-kit push:pg' >> /app/startup.sh && \
+    # Jalankan migrasi (lebih cocok untuk production daripada push:pg)
+    echo 'npx drizzle-kit migrate' >> /app/startup.sh && \
     echo 'echo "Migrasi database selesai!"' >> /app/startup.sh && \
     echo '' >> /app/startup.sh && \
     echo 'echo "Memulai server aplikasi..."' >> /app/startup.sh && \
