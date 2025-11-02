@@ -7,14 +7,7 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install production dependencies only
-COPY package.json package-lock.json* ./
-RUN npm ci --only=production --omit=dev
-
-# Install dev dependencies for build steps
-FROM base AS buildDeps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
+# Install all dependencies (including dev) for building and migrations
 COPY package.json package-lock.json* ./
 RUN npm ci
 
@@ -22,8 +15,6 @@ RUN npm ci
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-# Copy build dependencies to get dev dependencies needed for build steps
-COPY --from=buildDeps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Drizzle schema
@@ -41,16 +32,18 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+# For the Next.js standalone output, we need to copy the entire source files
+# because the migrations need the drizzle config, migrations folder and db folder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/drizzle.config.ts ./
+COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/db ./db
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
+# Then copy the standalone output
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 USER nextjs
 
@@ -59,12 +52,6 @@ EXPOSE $PORT 3000
 
 # Set the hostname to allow external connections
 ENV HOSTNAME="0.0.0.0"
-
-# Copy necessary files for migrations (including dev dependencies for drizzle-kit)
-COPY --from=buildDeps /app/node_modules ./node_modules
-COPY drizzle.config.ts ./
-COPY drizzle ./drizzle
-COPY db ./db
 
 # Create a startup script that runs migrations before starting the app
 RUN echo '#!/bin/sh\nset -e\nif [ -n "$DATABASE_URL" ]; then\n  echo "Running database migrations..."\n  npx drizzle-kit migrate\n  echo "Database migrations completed!"\nfi\nexec node server.js' > startup.sh && chmod +x startup.sh
