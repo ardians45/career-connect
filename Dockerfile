@@ -31,10 +31,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# --- PERUBAHAN DIMULAI DI SINI ---
-
 # Salin file-file yang dibutuhkan Drizzle untuk migrasi
-# (drizzle-kit akan ada di node_modules karena Langkah 1)
 COPY --from=builder --chown=nextjs:nodejs /app/drizzle.config.ts ./
 COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
 
@@ -46,7 +43,9 @@ RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'echo "Menjalankan migrasi database..."' >> /app/startup.sh && \
     # Jalankan migrasi
     echo 'npx drizzle-kit push:pg' >> /app/startup.sh && \
-    echo 'Migrasi database selesai!' >> /app/startup.sh && \
+    # ----- INI BARIS YANG DIPERBAIKI -----
+    echo 'echo "Migrasi database selesai!"' >> /app/startup.sh && \
+    # -----------------------------------
     echo '' >> /app/startup.sh && \
     echo 'Memulai server aplikasi...' >> /app/startup.sh && \
     # Jalankan server
@@ -58,8 +57,6 @@ RUN chown nextjs:nodejs /app/startup.sh
 
 # Ganti kembali ke pengguna non-root
 USER nextjs
-
-# --- AKHIR PERUBAHAN ---
 
 EXPOSE 3000
 ENV PORT=3000
