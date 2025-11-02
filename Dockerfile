@@ -40,14 +40,22 @@ USER root
 RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'set -e' >> /app/startup.sh && \
     echo '' >> /app/startup.sh && \
+    echo 'echo "--- MEMULAI SCRIPT STARTUP (MODE DEBUG) ---"' >> /app/startup.sh && \
+    echo '' >> /app/startup.sh && \
+    echo 'echo "Mencetak variabel... (Jika URL kosong, ini masalahnya)"' >> /app/startup.sh && \
+    # Cetak variabel untuk debug, potong sebagian agar aman
+    echo 'echo "DATABASE_URL (parsial): ${DATABASE_URL:0:40}..."' >> /app/startup.sh && \
+    echo '' >> /app/startup.sh && \
+    echo 'echo "Mencetak isi folder /app..."' >> /app/startup.sh && \
+    # Cetak isi folder untuk memastikan config Drizzle ada
+    echo 'ls -la /app' >> /app/startup.sh && \
+    echo '' >> /app/startup.sh && \
     echo 'echo "Menjalankan migrasi database..."' >> /app/startup.sh && \
     # Jalankan migrasi
     echo 'npx drizzle-kit push:pg' >> /app/startup.sh && \
-    # ----- INI BARIS YANG DIPERBAIKI -----
     echo 'echo "Migrasi database selesai!"' >> /app/startup.sh && \
-    # -----------------------------------
     echo '' >> /app/startup.sh && \
-    echo 'Memulai server aplikasi...' >> /app/startup.sh && \
+    echo 'echo "Memulai server aplikasi..."' >> /app/startup.sh && \
     # Jalankan server
     echo 'exec node server.js' >> /app/startup.sh
 
