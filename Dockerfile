@@ -49,8 +49,7 @@ RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'sleep 5' >> /app/startup.sh && \
     echo 'if [ -n "$DATABASE_URL" ]; then' >> /app/startup.sh && \
     echo '  echo "Menjalankan migrasi database..."' >> /app/startup.sh && \
-    echo '  npx drizzle-kit migrate' >> /app/startup.sh && \
-    echo '  echo "Migrasi database selesai!"' >> /app/startup.sh && \
+    echo '  npx drizzle-kit migrate || echo "Migrasi gagal (kemungkinan tabel sudah ada), lanjut ke server..."' >> /app/startup.sh && \
     echo 'fi' >> /app/startup.sh && \
     echo 'echo "Memulai server aplikasi..."' >> /app/startup.sh && \
     echo 'exec node server.js --hostname 0.0.0.0 --port $PORT' >> /app/startup.sh
