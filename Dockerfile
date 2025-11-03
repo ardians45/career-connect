@@ -42,7 +42,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/db ./db
 # Tetap sebagai root untuk membuat startup script karena user nextjs tidak punya izin
 USER root
 
-# Buat startup script yang lebih sederhana
+# Buat startup script yang lebih sederhana dan menunggu database
 RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'set -e' >> /app/startup.sh && \
     echo 'echo "Menunggu database siap..."' >> /app/startup.sh && \
@@ -53,7 +53,7 @@ RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo '  echo "Migrasi database selesai!"' >> /app/startup.sh && \
     echo 'fi' >> /app/startup.sh && \
     echo 'echo "Memulai server aplikasi..."' >> /app/startup.sh && \
-    echo 'exec node server.js' >> /app/startup.sh
+    echo 'exec node server.js --hostname 0.0.0.0 --port $PORT' >> /app/startup.sh
 
 # Beri izin eksekusi
 RUN chmod +x /app/startup.sh
