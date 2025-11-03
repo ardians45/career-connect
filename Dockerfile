@@ -39,8 +39,24 @@ COPY --from=builder --chown=nextjs:nodejs /app/drizzle.config.ts ./
 COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
 COPY --from=builder --chown=nextjs:nodejs /app/db ./db
 
-# Jalankan migrasi database sebelum memulai server
-RUN npx drizzle-kit migrate
+# Tetap sebagai root untuk membuat startup script karena user nextjs tidak punya izin
+USER root
+
+# Buat startup script yang lebih sederhana
+RUN echo '#!/bin/sh' > /app/startup.sh && \
+    echo 'set -e' >> /app/startup.sh && \
+    echo 'echo "Menunggu database siap..."' >> /app/startup.sh && \
+    echo 'sleep 5' >> /app/startup.sh && \
+    echo 'if [ -n "$DATABASE_URL" ]; then' >> /app/startup.sh && \
+    echo '  echo "Menjalankan migrasi database..."' >> /app/startup.sh && \
+    echo '  npx drizzle-kit migrate' >> /app/startup.sh && \
+    echo '  echo "Migrasi database selesai!"' >> /app/startup.sh && \
+    echo 'fi' >> /app/startup.sh && \
+    echo 'echo "Memulai server aplikasi..."' >> /app/startup.sh && \
+    echo 'exec node server.js' >> /app/startup.sh
+
+# Beri izin eksekusi
+RUN chmod +x /app/startup.sh
 
 # Ganti kembali ke pengguna non-root
 USER nextjs
@@ -49,5 +65,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Jalankan server langsung tanpa startup script tambahan
-CMD ["node", "server.js"]
+# Gunakan startup script
+CMD ["/app/startup.sh"]
