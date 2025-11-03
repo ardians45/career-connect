@@ -60,8 +60,8 @@ RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'echo "Migrasi database selesai!"' >> /app/startup.sh && \
     echo '' >> /app/startup.sh && \
     echo 'echo "Memulai server aplikasi..."' >> /app/startup.sh && \
-    # Jalankan server
-    echo 'exec node server.js' >> /app/startup.sh
+    # Jalankan server dengan environment variables yang benar
+    echo 'HOSTNAME="0.0.0.0" exec node server.js' >> /app/startup.sh
 
 # Beri izin eksekusi dan ganti pemilik file
 RUN chmod +x /app/startup.sh
@@ -74,4 +74,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Ganti CMD untuk menjalankan skrip startup baru
-CMD ["/app/startup.sh"]
+CMD ["sh", "-c", "/app/startup.sh"]
