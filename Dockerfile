@@ -34,9 +34,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 # Salin file-file yang dibutuhkan Drizzle untuk migrasi
 COPY --from=builder --chown=nextjs:nodejs /app/drizzle.config.ts ./
 COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/db ./db
 
+# Tetap sebagai root untuk membuat startup script
 # Buat startup script sebagai 'root' agar bisa 'chown'
-USER root
 RUN echo '#!/bin/sh' > /app/startup.sh && \
     echo 'set -e' >> /app/startup.sh && \
     echo '' >> /app/startup.sh && \
@@ -61,7 +62,6 @@ RUN echo '#!/bin/sh' > /app/startup.sh && \
 
 # Beri izin eksekusi dan ganti pemilik file
 RUN chmod +x /app/startup.sh
-RUN chown nextjs:nodejs /app/startup.sh
 
 # Ganti kembali ke pengguna non-root
 USER nextjs
