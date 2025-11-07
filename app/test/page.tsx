@@ -521,37 +521,62 @@ const TestPage = () => {
                 onValueChange={(value) => handleAnswerSelect(currentQ.id, parseInt(value))}
                 className="space-y-4"
               >
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent cursor-pointer">
-                  <RadioGroupItem value="1" id={`option-1-${currentQ.id}`} />
-                  <Label htmlFor={`option-1-${currentQ.id}`} className="flex-1">
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent hover:border-primary transition-colors duration-200 cursor-pointer"
+                  onClick={() => handleAnswerSelect(currentQ.id, 1)}
+                >
+                  <RadioGroupItem value="1" id={`option-1-${currentQ.id}`} className="cursor-pointer" />
+                  <Label 
+                    htmlFor={`option-1-${currentQ.id}`} 
+                    className="flex-1 cursor-pointer"
+                  >
                     Sangat Tidak Cocok
                   </Label>
                 </div>
                 
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent cursor-pointer">
-                  <RadioGroupItem value="2" id={`option-2-${currentQ.id}`} />
-                  <Label htmlFor={`option-2-${currentQ.id}`} className="flex-1">
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent hover:border-primary transition-colors duration-200 cursor-pointer"
+                  onClick={() => handleAnswerSelect(currentQ.id, 2)}
+                >
+                  <RadioGroupItem value="2" id={`option-2-${currentQ.id}`} className="cursor-pointer" />
+                  <Label 
+                    htmlFor={`option-2-${currentQ.id}`} 
+                    className="flex-1 cursor-pointer"
+                  >
                     Tidak Cocok
                   </Label>
                 </div>
                 
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent cursor-pointer">
-                  <RadioGroupItem value="3" id={`option-3-${currentQ.id}`} />
-                  <Label htmlFor={`option-3-${currentQ.id}`} className="flex-1">
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent hover:border-primary transition-colors duration-200 cursor-pointer"
+                  onClick={() => handleAnswerSelect(currentQ.id, 3)}
+                >
+                  <RadioGroupItem value="3" id={`option-3-${currentQ.id}`} className="cursor-pointer" />
+                  <Label 
+                    htmlFor={`option-3-${currentQ.id}`} 
+                    className="flex-1 cursor-pointer"
+                  >
                     Netral
                   </Label>
                 </div>
                 
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent cursor-pointer">
-                  <RadioGroupItem value="4" id={`option-4-${currentQ.id}`} />
-                  <Label htmlFor={`option-4-${currentQ.id}`} className="flex-1">
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent hover:border-primary transition-colors duration-200 cursor-pointer"
+                  onClick={() => handleAnswerSelect(currentQ.id, 4)}
+                >
+                  <RadioGroupItem value="4" id={`option-4-${currentQ.id}`} className="cursor-pointer" />
+                  <Label 
+                    htmlFor={`option-4-${currentQ.id}`} 
+                    className="flex-1 cursor-pointer"
+                  >
                     Cocok
                   </Label>
                 </div>
                 
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent cursor-pointer">
-                  <RadioGroupItem value="5" id={`option-5-${currentQ.id}`} />
-                  <Label htmlFor={`option-5-${currentQ.id}`} className="flex-1">
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent hover:border-primary transition-colors duration-200 cursor-pointer"
+                  onClick={() => handleAnswerSelect(currentQ.id, 5)}
+                >
+                  <RadioGroupItem value="5" id={`option-5-${currentQ.id}`} className="cursor-pointer" />
+                  <Label 
+                    htmlFor={`option-5-${currentQ.id}`} 
+                    className="flex-1 cursor-pointer"
+                  >
                     Sangat Cocok
                   </Label>
                 </div>
