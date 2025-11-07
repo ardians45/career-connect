@@ -419,59 +419,59 @@ const ResultsPage = () => {
           </CardContent>
         </Card>
 
-        {/* Scores Chart */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Skor Detail Per Kategori
-            </CardTitle>
-            <CardDescription>
-              Perbandingan skor untuk setiap kategori RIASEC
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={getChartData(result)}
-                  layout="vertical"
-                  margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    width={80}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [value, 'Skor']}
-                    labelFormatter={(value) => riasecDescriptions[value as keyof typeof riasecDescriptions]?.name}
-                  />
-                  <Bar dataKey="score" name="Skor">
-                    {getChartData(result).map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={
-                          entry.name === 'R' ? '#8884d8' : 
-                          entry.name === 'I' ? '#83a6ed' : 
-                          entry.name === 'A' ? '#8dd1e1' : 
-                          entry.name === 'S' ? '#82ca9d' : 
-                          entry.name === 'E' ? '#a4de6c' : 
-                          '#d0ed57'
-                        }
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            
-          </CardContent>
-        </Card>
+         {/* Scores Chart */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Skor Detail Per Kategori
+              </CardTitle>
+              <CardDescription>
+                Perbandingan skor untuk setiap kategori RIASEC
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={getChartData(result)}
+                    layout="vertical"
+                    margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      width={80}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      formatter={(value) => [value, 'Skor']}
+                      labelFormatter={(value) => riasecDescriptions[value as keyof typeof riasecDescriptions]?.name}
+                    />
+                    <Bar dataKey="score" name="Skor">
+                      {getChartData(result).map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            entry.name === 'R' ? '#8884d8' :
+                            entry.name === 'I' ? '#83a6ed' :
+                            entry.name === 'A' ? '#8dd1e1' :
+                            entry.name === 'S' ? '#82ca9d' :
+                            entry.name === 'E' ? '#a4de6c' :
+                            '#d0ed57'
+                          }
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+            </CardContent>
+          </Card>
 
         {/* Career Recommendations */}
         <Card className="mb-6">
@@ -540,9 +540,9 @@ const ResultsPage = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 justify-center">
-          <Button onClick={handleSaveResult} className="flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            Simpan Hasil
+          <Button onClick={() => router.push('/dashboard')} className="flex items-center gap-2">
+            <ArrowRight className="h-4 w-4 rotate-180" />
+            Kembali ke Dasbor
           </Button>
           {result && (
             <PDFDownloadLink

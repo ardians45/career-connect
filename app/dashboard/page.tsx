@@ -281,7 +281,7 @@ const DashboardPage = () => {
         <div className="flex items-center gap-2">
           <Button onClick={handleStartTest} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Penilaian Baru
+            Ikuti Tes
           </Button>
           {testResults && testResults.length > 0 && (
             <PDFDownloadLink
@@ -300,7 +300,7 @@ const DashboardPage = () => {
               {({ loading }) => (
                 <Button className="flex items-center gap-2" disabled={loading}>
                   <Download className="h-4 w-4" />
-                  {loading ? 'Menghasilkan...' : 'Unduh PDF'}
+                  {loading ? 'Menghasilkan...' : 'Unduh Hasil Tes'}
                 </Button>
               )}
             </PDFDownloadLink>

@@ -271,30 +271,33 @@ export default function Home() {
       </motion.div>
 
       {/* Header */}
-      <div className="container mx-auto px-4 py-4 md:py-6 relative z-10">
-        <div className="flex justify-between items-center">
-          {/* Logo container with text */}
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="relative w-[120px] sm:w-[40px] h-[40px] sm:h-[50px]">
-              <Image
-                src="/logo-cc.png"
-                alt="CareerConnect"
-                fill
-                sizes="(max-width: 640px) 40px, 120px"
-                className="object-contain"
-                priority
-              />
+      <div className="w-full px-4 py-3 md:py-4 relative z-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="absolute inset-x-0 top-0 h-full bg-gray-800/30 dark:bg-gray-800/50 backdrop-blur-md rounded-2xl -z-10"></div>
+          <div className="flex justify-between items-center">
+            {/* Logo container with text */}
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="relative w-[120px] sm:w-[40px] h-[40px] sm:h-[50px]">
+                <Image
+                  src="/logo-cc.png"
+                  alt="CareerConnect"
+                  fill
+                  sizes="(max-width: 640px) 40px, 120px"
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <span className="hidden sm:block text-xl md:text-2xl font-bold">
+                <span className="text-purple-400 dark:text-purple-300 underline">Career</span>
+                <span className="text-cyan-400 dark:text-cyan-300 underline">Connect</span>
+              </span>
             </div>
-            <span className="hidden sm:block text-xl md:text-2xl font-bold">
-              <span className="text-purple-400 dark:text-purple-300 underline">Career</span>
-              <span className="text-cyan-400 dark:text-cyan-300 underline">Connect</span>
-            </span>
-          </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <AuthButtons />
-            <ThemeToggle />
+            {/* Actions */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <AuthButtons />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </div>
@@ -374,16 +377,18 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {riasecTypes.map((type, index) => (
-              <TiltCard key={index} className="h-full">
+              <TiltCard key={index} className="h-full flex">
                 <ScrollReveal>
-                  <Card className="p-6 bg-gray-800/50 dark:bg-gray-800/70 backdrop-blur-sm border-gray-700 dark:border-gray-600 hover:border-cyan-500/50 dark:hover:border-cyan-400/50 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10 dark:hover:shadow-cyan-400/10 h-full transform-gpu">
+                  <Card className="p-6 bg-gray-800/50 dark:bg-gray-800/70 backdrop-blur-sm border-gray-700 dark:border-gray-600 hover:border-cyan-500/50 dark:hover:border-cyan-400/50 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10 dark:hover:shadow-cyan-400/10 h-full flex flex-col transform-gpu">
                     <div className="flex items-start gap-4">
                       <div className="bg-gray-700/50 dark:bg-gray-700/70 p-3 rounded-lg flex-shrink-0">
                         {type.icon}
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-lg text-white dark:text-gray-100">{type.title}</h3>
-                        <span className="text-sm text-cyan-400 dark:text-cyan-300 font-bold">{type.acronym}</span>
+                      <div className="flex flex-col justify-between">
+                        <div>
+                          <h3 className="font-semibold text-lg text-white dark:text-gray-100">{type.title}</h3>
+                          <span className="text-sm text-cyan-400 dark:text-cyan-300 font-bold">{type.acronym}</span>
+                        </div>
                         <p className="text-gray-300 dark:text-gray-400 mt-2">{type.description}</p>
                       </div>
                     </div>
@@ -411,9 +416,9 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             {advantages.map((feature, index) => (
-              <TiltCard key={index} className="h-full">
+              <TiltCard key={index} className="h-full flex">
                 <ScrollReveal>
-                  <Card className="p-6 bg-gray-800/30 dark:bg-gray-800/50 backdrop-blur-sm border-gray-700 dark:border-gray-600 hover:border-cyan-500/50 dark:hover:border-cyan-400/50 transition-all duration-300 h-full transform-gpu">
+                  <Card className="p-6 bg-gray-800/30 dark:bg-gray-800/50 backdrop-blur-sm border-gray-700 dark:border-gray-600 hover:border-cyan-500/50 dark:hover:border-cyan-400/50 transition-all duration-300 h-full flex flex-col transform-gpu">
                     <div className="flex items-start gap-4">
                       <div className="bg-gray-700/50 dark:bg-gray-700/70 p-2 rounded-lg group-hover:bg-cyan-500/10 dark:group-hover:bg-cyan-500/20 group-hover:text-cyan-400 dark:group-hover:text-cyan-300 transition-colors duration-300">
                         {feature.icon}

@@ -36,7 +36,7 @@ export function NavMain({
             >
               <Link href="/test">
                 <IconCirclePlusFilled />
-                <span>Buat Cepat</span>
+                <span>Ikuti Test Sekarang</span>
               </Link>
             </SidebarMenuButton>
             <Button

@@ -47,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Navigation items with functional links
   const navMain = [
     {
-      title: "Dasbor",
+      title: "Dasbor",  
       url: "/dashboard",
       icon: IconDashboard,
     },
