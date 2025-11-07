@@ -1,16 +1,14 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import { neon } from '@neondatabase/serverless';
 import { account, session, user, verification } from "@/db/schema/auth";
 
-// Create a pool with the exact connection string to ensure correct database
-const authPool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
+// Create a neon client using the serverless driver
+const sql = neon(process.env.DATABASE_URL!);
 
 // Create a separate drizzle instance specifically for auth
-const authDb = drizzle(authPool, {
+const authDb = drizzle(sql, {
     schema: {
         user,
         account,
