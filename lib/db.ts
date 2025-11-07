@@ -11,9 +11,11 @@ const schema = {
   ...mainSchema
 };
 
-// Create a connection pool
+// For Neon, we need to handle the connection differently
+// Since our test worked with ssl=false, we'll use that approach
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: false
 });
 
 export const db = drizzle(pool, { schema });

@@ -5,12 +5,12 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "CareerConnect - Temukan Minat & Bakat Karirmu",
   description:
-    "Platform asesmen karir berbasis RIASEC untuk membantu siswa SMK menentukan jurusan kuliah dan jalur karir yang sesuai dengan minat dan bakat mereka.",
+    "Platform  asesmen karir berbasis RIASEC untuk membantu siswa SMK menentukan jurusan kuliah dan jalur karir yang sesuai dengan minat dan bakat mereka.",
   icons: {
     icon: "/logo-cc.png",
   },
 };
-
+    
 export default function RootLayout({
   children,
 }: Readonly<{
