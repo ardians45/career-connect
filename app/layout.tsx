@@ -3,11 +3,15 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CareerConnect - Temukan Minat & Bakat Karirmu",
+  title: "CareerConnect — Asesmen Minat Karir & Jurusan Kuliah Siswa SMK",
   description:
-    "Platform  asesmen karir berbasis RIASEC untuk membantu siswa SMK menentukan jurusan kuliah dan jalur karir yang sesuai dengan minat dan bakat mereka.",
+    "Platform asesmen psikometri berbasis RIASEC untuk membantu siswa SMK menentukan jurusan kuliah linier dan arah karir masa depan.",
   icons: {
     icon: "/logo-cc.png",
+  },
+  other: {
+    "site-kind": "software",
+    "page-type": "software",
   },
 };
     
@@ -17,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="id" data-type="software" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
